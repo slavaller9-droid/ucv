@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#25d366" />
+  <title>BodegaControl | Sistema de Gestión, Tienda Online y Verificación de Pagos</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ==================== PANTALLA DE LOGIN Y REGISTRO ==================== -->
+  <section class="login-page" id="loginPage">
+    <div class="grid-glow"></div>
+    <div class="login-layout">
+      
+      <!-- Brand & Presentación -->
+      <div class="login-brand">
+        <div class="logo">🏪</div>
+        <div class="brand-kicker">BodegaControl · Sistema Integral</div>
+        <h1>Gestión de bodega y tienda online con boleta por WhatsApp.</h1>
+        <p>Control de inventario centralizado en tiempo real, ventas presenciales con POS, tienda virtual para clientes, verificación administrativa de pagos (Yape, Plin, Transferencias) y emisión automática de comprobantes directos a WhatsApp.</p>
+        <div class="login-features">
+          <span class="login-feature-tag">📦 Inventario Central</span>
+          <span class="login-feature-tag">🛍️ Tienda Online</span>
+          <span class="login-feature-tag">🛒 Ventas Presenciales</span>
+          <span class="login-feature-tag">🟣 Yape & Plin QR</span>
+          <span class="login-feature-tag">🏦 Transferencias BCP/BBVA</span>
+          <span class="login-feature-tag">🔍 Verificación de Pagos</span>
+          <span class="login-feature-tag">📲 Boleta por WhatsApp</span>
+        </div>
+      </div>
+
+      <!-- Tarjeta de Acceso / Registro -->
+      <div class="login-card">
+        <!-- Navegación de Pestañas: Iniciar Sesión / Crear Cuenta -->
+        <div class="auth-nav-tabs">
+          <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">Iniciar Sesión</button>
+          <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthTab('register')">Crear Cuenta (Cliente)</button>
+        </div>
+
+        <!-- FORMULARIO 1: INICIAR SESIÓN -->
+        <form id="loginForm">
+          <h2>Bienvenido</h2>
+          <p class="sub">Elige tu perfil de acceso para ingresar al panel o a la tienda:</p>
+
+          <!-- Selector de Perfil (Admin / Cajero / Cliente) -->
+          <div class="role-selector-pills">
+            <button type="button" class="role-pill active" id="btnRoleAdmin" onclick="setLoginProfile('admin')">👑 Administrador</button>
+            <button type="button" class="role-pill" id="btnRoleCajero" onclick="setLoginProfile('cajero')">🧑‍💻 Cajero</button>
+            <button type="button" class="role-pill" id="btnRoleClient" onclick="setLoginProfile('cliente')">🛍️ Cliente</button>
+          </div>
+          
+          <div class="field">
+            <label for="loginUser">Usuario</label>
+            <div class="input-wrap">
+              <input id="loginUser" type="text" placeholder="Ej. donpepe" autocomplete="username" value="donpepe" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="loginPass">Contraseña</label>
+            <div class="input-wrap">
+              <input id="loginPass" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" value="123" required />
+              <button class="toggle-pass" id="togglePass" type="button" aria-label="Mostrar contraseña">👁️</button>
+            </div>
+          </div>
+
+          <button class="login-btn" type="submit">Ingresar al Sistema</button>
+          
+          <div class="demo-hint">
+            <span>💡</span>
+            <div>
+              <strong>Perfiles de prueba disponibles:</strong><br>
+              • <b>Administrador:</b> donpepe / 123<br>
+              • <b>Cajero:</b> cajero1 / 123<br>
+              • <b>Cliente (Tienda):</b> cliente / 123
+            </div>
+          </div>
+          
+          <div class="login-msg" id="loginMsg"></div>
+        </form>
+
+        <!-- FORMULARIO 2: CREAR CUENTA DE CLIENTE -->
+        <form id="registerForm" class="hidden">
+          <h2>Crear Cuenta de Cliente</h2>
+          <p class="sub">Regístrate para comprar en nuestra tienda online y recibir tus boletas directas a tu WhatsApp.</p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="regName">Nombres *</label>
+              <input id="regName" type="text" placeholder="Ej. Rosa" required />
+            </div>
+            <div class="form-group">
+              <label for="regLastName">Apellidos *</label>
+              <input id="regLastName" type="text" placeholder="Ej. Quispe" required />
+            </div>
+            <div class="form-group full">
+              <label for="regPhone">Número de Celular / WhatsApp *</label>
+              <input id="regPhone" type="tel" placeholder="Ej. 987654321" required />
+            </div>
+            <div class="form-group full">
+              <label for="regEmail">Correo Electrónico (opcional)</label>
+              <input id="regEmail" type="email" placeholder="Ej. rosa.quispe@email.com" />
+            </div>
+            <div class="form-group">
+              <label for="regUser">Nombre de Usuario *</label>
+              <input id="regUser" type="text" placeholder="Ej. rosi24" required autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <label for="regPass">Contraseña *</label>
+              <input id="regPass" type="password" placeholder="Mínimo 3 caracteres" required autocomplete="new-password" />
+            </div>
+          </div>
+
+          <button class="login-btn" type="submit" style="margin-top:18px;">Crear mi Cuenta de Cliente</button>
+          
+          <div class="demo-hint" style="margin-top:14px;">
+            <span>ℹ️</span>
+            <div>
+              Las cuentas de cajero son creadas y gestionadas únicamente por el Administrador de la bodega desde su panel.
+            </div>
+          </div>
+
+          <div class="login-msg" id="regMsg"></div>
+        </form>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 1. PANEL DE PERSONAL (ADMIN & CAJERO) ==================== -->
+  <div class="app hidden" id="app">
+    
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="side-brand">
+        <div class="side-logo" id="sideLogoBadge">🏪</div>
+        <div>
+          <strong id="sideStoreName">BodegaControl</strong>
+          <span id="sideRoleBadge">Panel Administrador</span>
+        </div>
+      </div>
+
+      <!-- Menú de Navegación del Personal -->
+      <nav class="nav" id="nav">
+        <button class="active" data-view="inicio">
+          <span class="nav-icon">🏠</span>
+          <span>Inicio</span>
+        </button>
+        <button data-view="inventario">
+          <span class="nav-icon">📦</span>
+          <span>Inventario</span>
+          <span class="nav-badge hidden" id="navLowBadge">0</span>
+        </button>
+        <button data-view="ventas">
+          <span class="nav-icon">🛒</span>
+          <span>Ventas (POS)</span>
+        </button>
+        <button data-view="pedidos">
+          <span class="nav-icon">🛍️</span>
+          <span>Pedidos Online</span>
+          <span class="nav-badge badge-pending hidden" id="navOrdersBadge">0</span>
+        </button>
+        <button class="admin-only" data-view="verificacion-pagos">
+          <span class="nav-icon">🔍</span>
+          <span>Verificación de Pagos</span>
+          <span class="nav-badge badge-pending hidden" id="navVerifBadge">0</span>
+        </button>
+        <button class="admin-only" data-view="metodos-pago">
+          <span class="nav-icon">💳</span>
+          <span>Métodos de Pago</span>
+        </button>
+        <button class="admin-only" data-view="categorias">
+          <span class="nav-icon">📁</span>
+          <span>Categorías</span>
+        </button>
+        <button data-view="boletas">
+          <span class="nav-icon">🧾</span>
+          <span>Boletas</span>
+        </button>
+        <button data-view="movimientos">
+          <span class="nav-icon">🔄</span>
+          <span>Movimientos</span>
+        </button>
+        <button data-view="reportes">
+          <span class="nav-icon">📊</span>
+          <span>Reportes</span>
+        </button>
+        <button class="admin-only" data-view="usuarios">
+          <span class="nav-icon">👥</span>
+          <span>Usuarios</span>
+        </button>
+        <button class="admin-only" data-view="configuracion">
+          <span class="nav-icon">⚙️</span>
+          <span>Configuración</span>
+        </button>
+      </nav>
+
+      <div class="side-bottom">
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:12px;justify-content:center;background:#ffffff;" onclick="openStorefrontView()">
+          <span>🛍️ Ver Tienda Online</span>
+        </button>
+        
+        <div class="user-chip">
+          <div class="avatar" id="avatar">DP</div>
+          <div class="u-text">
+            <strong id="sideUser">Don Pepe</strong>
+            <span id="sideUserDesc">Dueño / Admin</span>
+          </div>
+          <button class="logout" id="logoutBtn" title="Cerrar sesión">🚪</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+    <main class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+          <div class="page-heading">
+            <h2 id="pageTitle">Inicio / Dashboard</h2>
+            <p id="pageSubtitle">Resumen general del inventario central y ventas de la bodega.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="role-switcher-btn" id="btnToggleRole" onclick="openStorefrontView()">
+            <span id="roleIcon">🛍️</span>
+            <span id="roleLabelText">Ver Tienda Online</span>
+          </button>
+          <span class="date-pill" id="currentDate">Lunes, 29 de Octubre</span>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- ==================== 1. VISTA INICIO / DASHBOARD ==================== -->
+        <section class="view active" id="view-inicio">
+          <div class="hero">
+            <div>
+              <h1 id="heroGreeting">¡Buen día! Tu bodega está lista para vender.</h1>
+              <p>Inventario central compartido: las ventas en mostrador (POS) y los pedidos online descuentan del mismo stock. Los pagos online son verificados exclusivamente por el administrador antes de su confirmación.</p>
+            </div>
+            <div class="hero-art">🏪</div>
+          </div>
+
+          <!-- Métricas del Dashboard Fila 1 -->
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-icon violet">📦</div>
+              <div>
+                <small>Total de productos</small>
+                <strong id="statProducts">0</strong>
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-icon blue">▥</div>
+              <div>
+                <small>Unidades disponibles</small>
+                <strong id="statUnits">0</strong>
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-icon yellow">⚠️</div>
+              <div>
+                <small>Productos con stock bajo</small>
+                <strong id="statLow" style="color:var(--warning);">0</strong>
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-icon green">💰</div>
+              <div>
+                <small>Ventas totales históricas</small>
+                <strong id="statSalesRevenue">S/ 0.00</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Métricas del Dashboard Fila 2 -->
+          <div class="stats" style="margin-top:14px;">
+            <div class="stat">
+              <div class="stat-icon pink">🧾</div>
+              <div>
+                <small>Ventas del día</small>
+                <strong id="statTodaySales">S/ 0.00</strong>
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-icon violet">🛍️</div>
+              <div>
+                <small>Ventas Online</small>
+                <strong id="statOnlineSales">S/ 0.00</strong>
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-icon yellow">🔍</div>
+              <div>
+                <small>Pagos por verificar</small>
+                <strong id="statPendingVerifications" style="color:var(--warning);">0</strong>
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-icon green">🏷️</div>
+              <div>
+                <small>Valor aprox. inventario</small>
+                <strong id="statInventoryValue">S/ 0.00</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paneles de Actividad Rápida -->
+          <div class="grid-2">
+            <!-- Ventas Recientes -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Últimas Ventas Realizadas</h3>
+                  <small>Comprobantes emitidos y listos para WhatsApp</small>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('boletas')">Ver todas</button>
+              </div>
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Boleta</th>
+                      <th>Canal</th>
+                      <th>Cliente</th>
+                      <th>Método</th>
+                      <th>Total</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardRecentSales"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Alertas de Stock Bajo -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>⚠️ Alertas de Stock Bajo</h3>
+                  <small>Productos que requieren reposición urgente</small>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('inventario')">Inventario</button>
+              </div>
+              <div class="stock-list" id="dashboardLowStock"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 2. VISTA INVENTARIO CENTRAL ==================== -->
+        <section class="view" id="view-inventario">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">Inventario Central Compartido</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Único catálogo para tienda física y tienda online. El stock se descuenta en tiempo real.</p>
+            </div>
+            <div class="toolbar-right">
+              <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input class="search" id="inventorySearch" placeholder="Buscar por producto, SKU o categoría…" oninput="renderInventoryTable()" />
+              </div>
+              <select class="category-filter" id="inventoryCatFilter" onchange="filterInventoryByCategory(this.value)">
+                <option value="Todos">Todas las categorías</option>
+              </select>
+              <button class="btn btn-outline" id="btnStockEntry" onclick="openStockEntryModal()">📥 Entrada de Stock</button>
+              <button class="btn btn-primary admin-only" id="btnNewProduct" onclick="openProductModal()">＋ Nuevo Producto</button>
+            </div>
+          </div>
+
+          <!-- Filtros Rápidos de Categoría -->
+          <div class="pos-categories" id="invCategoryPills" style="margin-bottom:16px;"></div>
+
+          <!-- Tabla de Productos del Inventario -->
+          <div class="panel">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Foto / Icono</th>
+                    <th>SKU</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock Disponible</th>
+                    <th>Mínimo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 3. VISTA VENTAS PRESENCIALES (POS) ==================== -->
+        <section class="view" id="view-ventas">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">Ventas Presenciales (Caja de la Bodega)</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Registro de compras mostrador con descuento automático de stock.</p>
+            </div>
+            <div class="toolbar-right">
+              <div class="search-wrap" style="min-width:300px;">
+                <span class="search-icon">🔍</span>
+                <input class="search" id="posSearch" placeholder="Buscar producto por nombre o SKU…" oninput="renderPosProducts()" />
+              </div>
+            </div>
+          </div>
+
+          <div class="pos-layout">
+            <!-- Catálogo de productos disponibles -->
+            <div class="pos-products">
+              <div class="pos-categories" id="posCategoryPills"></div>
+              <div class="pos-grid" id="posGrid"></div>
+            </div>
+
+            <!-- Carrito de Venta Presencial -->
+            <aside class="pos-cart-panel">
+              <div class="cart-header">
+                <h3>🛒 Carrito Presencial</h3>
+                <span class="badge b-purple" id="cartCount">0 un.</span>
+              </div>
+
+              <div class="cart-items" id="cartItems"></div>
+
+              <div class="customer-inputs">
+                <input type="text" id="customerName" placeholder="Nombre del cliente (opcional)" />
+                <input type="tel" id="customerPhone" placeholder="WhatsApp del cliente (opcional)" />
+              </div>
+
+              <div class="cart-summary">
+                <div class="summary-row">
+                  <span>Subtotal:</span>
+                  <span id="cartSubtotal">S/ 0.00</span>
+                </div>
+                <div class="summary-row total">
+                  <span>TOTAL A PAGAR:</span>
+                  <span id="cartTotal" style="color:var(--primary);">S/ 0.00</span>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;display:flex;gap:8px;">
+                <button class="btn btn-outline" id="btnClearCart" onclick="clearPosCart()" style="flex:0.4;">Vaciar</button>
+                <button class="btn btn-primary btn-lg" id="btnProceedPayment" onclick="openPosPaymentModal()" style="flex:1;">
+                  Cobrar <span id="btnProceedPaymentAmount" style="margin-left:6px;">S/ 0.00</span> →
+                </button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ==================== 4. VISTA PEDIDOS ONLINE (ESTADOS INDEPENDIENTES) ==================== -->
+        <section class="view" id="view-pedidos">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">🛍️ Gestión de Pedidos Online</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Control de los 3 estados independientes: <b>Estado del Pago</b>, <b>Estado del Pedido</b> y <b>Estado de la Entrega</b>.</p>
+            </div>
+            <div class="toolbar-right">
+              <div class="search-wrap" style="min-width:260px;">
+                <span class="search-icon">🔍</span>
+                <input class="search" id="ordersSearch" placeholder="Buscar por código, cliente o celular…" oninput="renderOnlineOrdersTable()" />
+              </div>
+              <select class="category-filter" id="ordersStatusFilter" onchange="renderOnlineOrdersTable()">
+                <option value="todos">Todos los pedidos</option>
+                <option value="pay_pendiente">Pago: Pendiente de verificación</option>
+                <option value="pay_revision">Pago: En revisión</option>
+                <option value="pay_confirmado">Pago: Confirmado</option>
+                <option value="pay_rechazado">Pago: Rechazado</option>
+                <option value="ord_preparacion">Pedido: En preparación</option>
+                <option value="ord_listo">Pedido: Listo para entrega</option>
+                <option value="del_camino">Entrega: En camino</option>
+                <option value="del_entregado">Entrega: Entregado</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tabla de Pedidos Online -->
+          <div class="panel">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Fecha / Hora</th>
+                    <th>Cliente</th>
+                    <th>Entrega</th>
+                    <th>Productos</th>
+                    <th>Total</th>
+                    <th>Método</th>
+                    <th>Estado Pago</th>
+                    <th>Estado Pedido</th>
+                    <th>Estado Entrega</th>
+                    <th>Voucher</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="onlineOrdersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 5. VISTA: VERIFICACIÓN DE PAGOS (ADMIN ONLY) ==================== -->
+        <section class="view admin-only" id="view-verificacion-pagos">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">🔍 Verificación de Pagos</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Revisa las transferencias y comprobantes enviados por los clientes. Solo el administrador puede aprobar o rechazar un pago.</p>
+            </div>
+            <div class="toolbar-right">
+              <div class="search-wrap" style="min-width:240px;">
+                <span class="search-icon">🔍</span>
+                <input class="search" id="verifSearch" placeholder="Buscar por código, cliente o celular…" oninput="renderPaymentVerificationTable()" />
+              </div>
+              <select class="category-filter" id="verifStatusFilter" onchange="renderPaymentVerificationTable()">
+                <option value="todos">Todos los estados de pago</option>
+                <option value="Pendiente de verificación" selected>Pendiente de verificación</option>
+                <option value="En revisión">En revisión</option>
+                <option value="Confirmado">Confirmados</option>
+                <option value="Rechazado">Rechazados</option>
+              </select>
+              <select class="category-filter" id="verifMethodFilter" onchange="renderPaymentVerificationTable()">
+                <option value="todos">Todos los métodos</option>
+                <option value="Yape">Yape</option>
+                <option value="Plin">Plin</option>
+                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                <option value="Efectivo">Efectivo</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tabla de Verificación de Pagos -->
+          <div class="panel">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>N.º Pedido</th>
+                    <th>Fecha y Hora</th>
+                    <th>Cliente</th>
+                    <th>WhatsApp</th>
+                    <th>Productos Adquiridos</th>
+                    <th>Monto Total</th>
+                    <th>Método de Pago</th>
+                    <th>Comprobante</th>
+                    <th>Estado Actual del Pago</th>
+                    <th>Acciones del Administrador</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentVerificationTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 6. VISTA: MÉTODOS DE PAGO (ADMIN ONLY) ==================== -->
+        <section class="view admin-only" id="view-metodos-pago">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">💳 Configuración de Métodos de Pago</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Activa o desactiva métodos, actualiza cuentas bancarias, números de celular y códigos QR. Si un método está inactivo, no se mostrará a los clientes.</p>
+            </div>
+            <button class="btn btn-primary" onclick="saveAllPaymentMethods()">💾 Guardar Métodos de Pago</button>
+          </div>
+
+          <div class="grid-2">
+            <!-- 1. YAPE -->
+            <div class="method-card-admin" id="cardMethodYape">
+              <div class="method-card-head">
+                <div class="method-card-title">
+                  <span style="font-size:24px;">🟣</span>
+                  <div>
+                    <h3>Yape</h3>
+                    <small style="color:var(--muted);">Billetera digital BCP</small>
+                  </div>
+                </div>
+                <div class="switch-container">
+                  <span style="font-size:12px;font-weight:700;" id="labelMethodYapeStatus">Habilitado</span>
+                  <label class="switch">
+                    <input type="checkbox" id="cfgMethodYapeActive" onchange="togglePaymentMethodActive('yape', this.checked)" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Titular de la Cuenta Yape *</label>
+                  <input type="text" id="cfgMethodYapeOwner" placeholder="Ej. José Pepe Morales" required />
+                </div>
+                <div class="form-group">
+                  <label>Número de Celular Yape *</label>
+                  <input type="text" id="cfgMethodYapePhone" placeholder="Ej. 987 654 321" required />
+                </div>
+                <div class="form-group full">
+                  <label>Subir / Actualizar Código QR de Yape (Imagen)</label>
+                  <input type="file" id="cfgMethodYapeQrFile" accept="image/*" onchange="handleMethodQrUpload('yape', this)" />
+                  <div class="image-preview-box" id="cfgMethodYapeQrPreviewBox" style="margin-top:8px;">
+                    <span id="cfgMethodYapeQrPlaceholder" style="font-size:12px;color:var(--muted);">Sin QR</span>
+                    <img id="cfgMethodYapeQrImg" class="hidden" alt="QR Yape" />
+                  </div>
+                </div>
+                <div class="form-group full">
+                  <label>Instrucciones para el Cliente</label>
+                  <input type="text" id="cfgMethodYapeInstructions" value="Escanea el código QR desde tu app Yape o transfiere al número celular indicado." />
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. PLIN -->
+            <div class="method-card-admin" id="cardMethodPlin">
+              <div class="method-card-head">
+                <div class="method-card-title">
+                  <span style="font-size:24px;">🔵</span>
+                  <div>
+                    <h3>Plin</h3>
+                    <small style="color:var(--muted);">Billetera digital BBVA, Interbank, Scotiabank</small>
+                  </div>
+                </div>
+                <div class="switch-container">
+                  <span style="font-size:12px;font-weight:700;" id="labelMethodPlinStatus">Habilitado</span>
+                  <label class="switch">
+                    <input type="checkbox" id="cfgMethodPlinActive" onchange="togglePaymentMethodActive('plin', this.checked)" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Titular de la Cuenta Plin *</label>
+                  <input type="text" id="cfgMethodPlinOwner" placeholder="Ej. José Pepe Morales" required />
+                </div>
+                <div class="form-group">
+                  <label>Número de Celular Plin *</label>
+                  <input type="text" id="cfgMethodPlinPhone" placeholder="Ej. 987 654 321" required />
+                </div>
+                <div class="form-group full">
+                  <label>Subir / Actualizar Código QR de Plin (Imagen)</label>
+                  <input type="file" id="cfgMethodPlinQrFile" accept="image/*" onchange="handleMethodQrUpload('plin', this)" />
+                  <div class="image-preview-box" id="cfgMethodPlinQrPreviewBox" style="margin-top:8px;">
+                    <span id="cfgMethodPlinQrPlaceholder" style="font-size:12px;color:var(--muted);">Sin QR</span>
+                    <img id="cfgMethodPlinQrImg" class="hidden" alt="QR Plin" />
+                  </div>
+                </div>
+                <div class="form-group full">
+                  <label>Instrucciones para el Cliente</label>
+                  <input type="text" id="cfgMethodPlinInstructions" value="Escanea el código QR desde tu app Plin o transfiere al número celular indicado." />
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. TRANSFERENCIA BANCARIA -->
+            <div class="method-card-admin" id="cardMethodTransferencia">
+              <div class="method-card-head">
+                <div class="method-card-title">
+                  <span style="font-size:24px;">🏦</span>
+                  <div>
+                    <h3>Transferencia Bancaria</h3>
+                    <small style="color:var(--muted);">Cuentas corrientes / ahorros y CCI</small>
+                  </div>
+                </div>
+                <div class="switch-container">
+                  <span style="font-size:12px;font-weight:700;" id="labelMethodTransferenciaStatus">Habilitado</span>
+                  <label class="switch">
+                    <input type="checkbox" id="cfgMethodTransferenciaActive" onchange="togglePaymentMethodActive('transferencia', this.checked)" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Nombre del Banco *</label>
+                  <input type="text" id="cfgMethodBankName" placeholder="Ej. BCP / BBVA / Interbank" required />
+                </div>
+                <div class="form-group">
+                  <label>Titular de la Cuenta Bancaria *</label>
+                  <input type="text" id="cfgMethodBankOwner" placeholder="Ej. José Pepe Morales" required />
+                </div>
+                <div class="form-group">
+                  <label>Número de Cuenta *</label>
+                  <input type="text" id="cfgMethodBankAccount" placeholder="Ej. 191-98765432-0-88" required />
+                </div>
+                <div class="form-group">
+                  <label>Código de Cuenta Interbancario (CCI) *</label>
+                  <input type="text" id="cfgMethodBankCci" placeholder="Ej. 002-191-009876543208-88" required />
+                </div>
+                <div class="form-group full">
+                  <label>Subir Imagen de Cuenta / QR Bancario (Opcional)</label>
+                  <input type="file" id="cfgMethodBankQrFile" accept="image/*" onchange="handleMethodQrUpload('transferencia', this)" />
+                  <div class="image-preview-box" id="cfgMethodBankQrPreviewBox" style="margin-top:8px;">
+                    <span id="cfgMethodBankQrPlaceholder" style="font-size:12px;color:var(--muted);">Sin QR</span>
+                    <img id="cfgMethodBankQrImg" class="hidden" alt="QR Bancario" />
+                  </div>
+                </div>
+                <div class="form-group full">
+                  <label>Instrucciones para el Cliente</label>
+                  <input type="text" id="cfgMethodBankInstructions" value="Transfiere a nuestra cuenta o CCI desde tu banca por internet y adjunta la constancia." />
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. EFECTIVO -->
+            <div class="method-card-admin" id="cardMethodEfectivo">
+              <div class="method-card-head">
+                <div class="method-card-title">
+                  <span style="font-size:24px;">💵</span>
+                  <div>
+                    <h3>Efectivo</h3>
+                    <small style="color:var(--muted);">Pago contraentrega o en mostrador</small>
+                  </div>
+                </div>
+                <div class="switch-container">
+                  <span style="font-size:12px;font-weight:700;" id="labelMethodEfectivoStatus">Habilitado</span>
+                  <label class="switch">
+                    <input type="checkbox" id="cfgMethodEfectivoActive" onchange="togglePaymentMethodActive('efectivo', this.checked)" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group full">
+                  <label>Instrucciones para el Cliente</label>
+                  <input type="text" id="cfgMethodEfectivoInstructions" value="Paga en efectivo al momento de recibir tu entrega o al recoger en tienda." />
+                </div>
+                <div class="form-group full">
+                  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;font-size:12.5px;color:#166534;line-height:1.45;">
+                    💡 <b>Nota:</b> Para pedidos en efectivo, el repartidor o cajero cobrará en persona y el administrador confirmará el pago en el panel al recibir el dinero.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 7. VISTA CATEGORÍAS (ADMIN ONLY) ==================== -->
+        <section class="view admin-only" id="view-categorias">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">📁 Gestión de Categorías</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Organiza los productos de tu bodega. No se pueden eliminar categorías que contengan productos activos.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCategoryModal()">＋ Nueva Categoría</button>
+          </div>
+
+          <div class="panel">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Icono</th>
+                    <th>Nombre de Categoría</th>
+                    <th>Productos Asociados</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="categoriesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 8. VISTA BOLETAS ==================== -->
+        <section class="view" id="view-boletas">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">Historial de Boletas Emitidas</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Comprobantes con opciones de impresión térmica, descarga y reenvío directo a WhatsApp.</p>
+            </div>
+            <div class="toolbar-right">
+              <div class="search-wrap" style="min-width:320px;">
+                <span class="search-icon">🔍</span>
+                <input class="search" id="boletaSearch" placeholder="Buscar por código, cliente o canal…" oninput="renderBoletasTable()" />
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Nº Boleta</th>
+                    <th>Fecha y Hora</th>
+                    <th>Canal</th>
+                    <th>Cliente</th>
+                    <th>Productos</th>
+                    <th>Método</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="boletasTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 9. VISTA MOVIMIENTOS ==================== -->
+        <section class="view" id="view-movimientos">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">Historial de Movimientos de Inventario</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Auditoría completa de entradas, ventas presenciales y salidas por tienda online.</p>
+            </div>
+            <div class="toolbar-right">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-outline mov-tab active" data-filter="all" onclick="setMovementFilter('all')">Todos</button>
+                <button class="btn btn-outline mov-tab" data-filter="in" onclick="setMovementFilter('in')">📥 Entradas</button>
+                <button class="btn btn-outline mov-tab" data-filter="venta_presencial" onclick="setMovementFilter('venta_presencial')">🛒 Venta Presencial</button>
+                <button class="btn btn-outline mov-tab" data-filter="venta_online" onclick="setMovementFilter('venta_online')">🛍️ Venta Online</button>
+              </div>
+              <button class="btn btn-primary" onclick="openStockEntryModal()">＋ Entrada de Mercancía</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="margin-bottom:16px;">
+              <input class="search" id="movementSearch" placeholder="Filtrar por producto o motivo…" oninput="renderMovementsList()" />
+            </div>
+            <div class="movements-timeline" id="movementsTimeline"></div>
+          </div>
+        </section>
+
+        <!-- ==================== 10. VISTA REPORTES ==================== -->
+        <section class="view" id="view-reportes">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">Reportes de la Bodega</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Métricas detalladas de ventas presenciales vs online, métodos de pago y productos más vendidos.</p>
+            </div>
+            <button class="btn btn-outline" onclick="renderReportsData()">🔄 Actualizar Reportes</button>
+          </div>
+
+          <div class="report-grid">
+            <div class="report-card">
+              <h3>Total de Ventas</h3>
+              <p>Facturación total acumulada de la bodega.</p>
+              <div class="report-number" id="repTotalRevenue" style="color:var(--success);">S/ 0.00</div>
+              <span class="badge b-ok">Total histórico</span>
+            </div>
+            <div class="report-card">
+              <h3>Ventas del Día</h3>
+              <p>Monto cobrado hoy.</p>
+              <div class="report-number" id="repTodayRevenue" style="color:var(--primary);">S/ 0.00</div>
+              <span class="badge b-purple">Hoy</span>
+            </div>
+            <div class="report-card">
+              <h3>Ventas Online</h3>
+              <p>Pedidos procesados en la tienda web.</p>
+              <div class="report-number" id="repOnlineRevenue" style="color:#731e84;">S/ 0.00</div>
+              <span class="badge b-channel-online" id="repOnlineCount">0 pedidos</span>
+            </div>
+            <div class="report-card">
+              <h3>Ventas Presenciales</h3>
+              <p>Cobros directos en mostrador (POS).</p>
+              <div class="report-number" id="repPresencialRevenue" style="color:#0369a1;">S/ 0.00</div>
+              <span class="badge b-channel-presencial" id="repPresencialCount">0 ventas</span>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top:20px;">
+            <!-- Métodos de Pago Utilizados -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Métodos de Pago Utilizados</h3>
+                  <small>Distribución por Efectivo, Yape, Plin y Transferencias</small>
+                </div>
+              </div>
+              <div id="paymentMethodsBreakdown" style="display:flex;flex-direction:column;gap:12px;padding:8px 0;"></div>
+            </div>
+
+            <!-- Top Productos Más Vendidos -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Top Productos Más Vendidos</h3>
+                  <small>Artículos con mayor demanda</small>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Producto</th>
+                      <th>Unidades</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="topProductsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfica de Barras de Ventas -->
+          <div class="panel" style="margin-top:20px;">
+            <div class="panel-head">
+              <div>
+                <h3>Actividad Comercial (Últimos Días)</h3>
+                <small>Evolución de ingresos diarios en Soles (S/)</small>
+              </div>
+            </div>
+            <div class="mini-bars" id="salesBarsContainer"></div>
+            <div class="bar-labels" id="salesBarsLabels"></div>
+          </div>
+        </section>
+
+        <!-- ==================== 11. VISTA USUARIOS (ADMIN ONLY) ==================== -->
+        <section class="view admin-only" id="view-usuarios">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">Gestión de Usuarios</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Administradores del sistema, cuentas de cajeros y clientes registrados.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCashierModal()">＋ Crear Cuenta de Cajero</button>
+          </div>
+
+          <div class="panel">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Celular / WhatsApp</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 12. VISTA CONFIGURACIÓN (ADMIN ONLY) ==================== -->
+        <section class="view admin-only" id="view-configuracion">
+          <div class="section-toolbar">
+            <div>
+              <h2 style="font-size:22px;letter-spacing:-0.02em;">Configuración del Sistema</h2>
+              <p style="margin-top:4px;color:var(--muted);font-size:12.5px;">Personaliza el nombre, logo de la bodega y mensajería de WhatsApp.</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <!-- Datos de la Bodega y Logo -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Información de la Bodega y Logo</h3>
+                  <small>Datos visibles en la tienda online y en las boletas</small>
+                </div>
+              </div>
+              <form id="generalConfigForm">
+                <div class="form-grid">
+                  <div class="form-group full">
+                    <label>Nombre de la Bodega *</label>
+                    <input type="text" id="cfgStoreName" required />
+                  </div>
+                  <div class="form-group full">
+                    <label>Subtítulo o Giro Comercial</label>
+                    <input type="text" id="cfgSubtitle" required />
+                  </div>
+                  <div class="form-group">
+                    <label>RUC</label>
+                    <input type="text" id="cfgRuc" required />
+                  </div>
+                  <div class="form-group">
+                    <label>Teléfono / Celular de Contacto</label>
+                    <input type="text" id="cfgPhone" required />
+                  </div>
+                  <div class="form-group full">
+                    <label>Dirección Física de la Bodega</label>
+                    <input type="text" id="cfgAddress" required />
+                  </div>
+                  <div class="form-group full">
+                    <label>Subir Logo de la Bodega (Imagen real)</label>
+                    <input type="file" id="cfgLogoFile" accept="image/*" onchange="handleLogoUpload(this)" />
+                    <div class="image-preview-box" id="cfgLogoPreviewBox" style="margin-top:8px;">
+                      <span id="cfgLogoPlaceholder" style="font-size:24px;">🏪</span>
+                      <img id="cfgLogoImg" class="hidden" alt="Logo Bodega" />
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <button type="submit" class="btn btn-primary">Guardar Información</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Configuración de WhatsApp -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Mensajería por WhatsApp</h3>
+                  <small>Parámetros de la boleta automática que se abre al confirmar una venta</small>
+                </div>
+              </div>
+              <form id="whatsappConfigForm">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Prefijo País WhatsApp</label>
+                    <input type="text" id="cfgWaPrefix" value="51" required placeholder="51 para Perú" />
+                  </div>
+                  <div class="form-group">
+                    <label>Símbolo de Moneda</label>
+                    <input type="text" id="cfgCurrency" value="S/" required />
+                  </div>
+                  <div class="form-group full">
+                    <label>Mensaje de Agradecimiento</label>
+                    <textarea id="cfgWaGreeting" rows="3" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;">¡Muchas gracias por su compra en Bodega Don Pepe! Que tenga un excelente día y vuelva pronto.</textarea>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <button type="submit" class="btn btn-primary">Guardar Configuración WhatsApp</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== 2. TIENDA ONLINE STANDALONE (CLIENTE) ==================== -->
+  <div class="client-store-app hidden" id="clientStoreApp">
+    
+    <!-- Cabecera de la Tienda Virtual -->
+    <header class="client-header">
+      <div class="client-header-inner">
+        <div class="client-brand">
+          <div id="clientLogoBadge" class="client-logo-badge">🏪</div>
+          <div>
+            <h1 id="clientStoreBrandName">Bodega Don Pepe</h1>
+            <span id="clientStoreBrandSub">Tienda Online Oficial · Pedidos con Boleta a WhatsApp</span>
+          </div>
+        </div>
+
+        <div class="client-search-wrap">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;">🔍</span>
+          <input type="text" id="clientSearchInput" placeholder="¿Qué necesitas hoy? Busca arroz, aceite, bebidas..." oninput="renderClientProducts()" />
+        </div>
+
+        <div class="client-actions">
+          <button class="btn btn-outline btn-sm" onclick="openClientOrdersModal()" style="font-weight:700;">
+            <span>📦 Mis Pedidos</span>
+          </button>
+
+          <button class="client-cart-trigger" onclick="openOnlineCartModal()">
+            <span>🛒 Mi Carrito</span>
+            <span class="badge" id="clientCartBadge" style="background:white;color:var(--primary);font-weight:900;">0</span>
+            <span id="clientCartNavTotal" style="font-size:12.5px;">S/ 0.00</span>
+          </button>
+
+          <div class="client-user-info">
+            <span id="clientUserNameText" style="font-size:13px;font-weight:700;color:var(--ink);">María Flores</span>
+            <button class="logout" onclick="logoutClient()" title="Cerrar sesión" style="width:34px;height:34px;border-radius:10px;background:#f1f3f9;display:grid;place-items:center;">🚪</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenedor Principal de la Tienda -->
+    <main class="client-container">
+      
+      <!-- Hero Promocional -->
+      <div class="client-hero-banner">
+        <div>
+          <h2>¡Bienvenido a nuestra tienda virtual!</h2>
+          <p>Compra fácil y rápido desde tu celular o computadora. Nuestro inventario está sincronizado en tiempo real con la bodega física. Pagos verificados con seguridad.</p>
+          <div class="client-badges-row">
+            <span class="client-badge-tag">⚡ Entrega Inmediata</span>
+            <span class="client-badge-tag">🟣 Paga con Yape</span>
+            <span class="client-badge-tag">🔵 Paga con Plin</span>
+            <span class="client-badge-tag">🏦 Transferencia Bancaria</span>
+            <span class="client-badge-tag">💵 Efectivo</span>
+            <span class="client-badge-tag">📲 Boleta directa a tu WhatsApp</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros por Categoría -->
+      <div class="pos-categories" id="clientCategoryPills" style="margin-bottom:20px;"></div>
+
+      <!-- Cuadrícula de Productos -->
+      <div class="online-grid" id="clientProductGrid"></div>
+    </main>
+  </div>
+
+  <!-- ==================== MODALES DEL SISTEMA ==================== -->
+
+  <!-- MODAL 1: AGREGAR / EDITAR PRODUCTO -->
+  <div class="modal-backdrop hidden" id="modalProduct">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalProductTitle">
+      <div class="modal-head">
+        <h3 id="modalProductTitle">Nuevo Producto</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+      <form id="productForm">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="pName">Nombre del Producto *</label>
+            <input id="pName" type="text" required placeholder="Ej. Arroz Costeño Extra 1 kg" />
+          </div>
+          
+          <div class="form-group">
+            <label for="pSku">Código / SKU</label>
+            <input id="pSku" type="text" placeholder="Ej. AB-005" />
+          </div>
+
+          <div class="form-group">
+            <label for="pCategory">Categoría *</label>
+            <select id="pCategory" required></select>
+          </div>
+
+          <div class="form-group">
+            <label for="pEmoji">Icono / Emoji Fallback</label>
+            <select id="pEmoji">
+              <option value="📦">📦 General</option>
+              <option value="🍚">🍚 Arroz / Granos</option>
+              <option value="🧴">🧴 Aceite</option>
+              <option value="🥛">🥛 Lácteos</option>
+              <option value="🥫">🥫 Conservas / Atún</option>
+              <option value="☕">☕ Café / Infusiones</option>
+              <option value="🥚">🥚 Huevos</option>
+              <option value="🍞">🍞 Panadería</option>
+              <option value="🥤">🥤 Bebidas / Gaseosas</option>
+              <option value="🧃">🧃 Jugos</option>
+              <option value="🧼">🧼 Jabón / Aseo</option>
+              <option value="🧹">🧹 Limpieza</option>
+              <option value="🍪">🍪 Galletas / Snacks</option>
+              <option value="🍫">🍫 Chocolates / Dulces</option>
+              <option value="🍬">🍬 Caramelos</option>
+              <option value="🍝">🍝 Fideos / Pastas</option>
+              <option value="💧">💧 Agua</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="pImageFile">Subir Imagen Real del Producto</label>
+            <input type="file" id="pImageFile" accept="image/*" onchange="handleProductImageUpload(this)" />
+            <div class="image-preview-box" id="productImgPreviewBox">
+              <span id="productImgPlaceholder" style="font-size:24px;">📦</span>
+              <img id="productImgPreview" class="hidden" alt="Preview producto" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pPrice">Precio de Venta (S/) *</label>
+            <input id="pPrice" type="number" step="0.10" min="0" required placeholder="0.00" />
+          </div>
+
+          <div class="form-group">
+            <label for="pStock">Stock Disponible *</label>
+            <input id="pStock" type="number" step="1" min="0" required placeholder="0" />
+          </div>
+
+          <div class="form-group">
+            <label for="pMin">Stock Mínimo (Alerta) *</label>
+            <input id="pMin" type="number" step="1" min="1" required placeholder="5" value="5" />
+          </div>
+
+          <div class="form-group full">
+            <label for="pDesc">Descripción para la Tienda Online</label>
+            <input id="pDesc" type="text" placeholder="Ej. Presentación familiar en bolsa sellada." />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: GESTIONAR CATEGORÍA -->
+  <div class="modal-backdrop hidden" id="modalCategory">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalCatTitle">
+      <div class="modal-head">
+        <h3 id="modalCatTitle">Nueva Categoría</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+      <form id="categoryForm">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="catName">Nombre de la Categoría *</label>
+            <input id="catName" type="text" required placeholder="Ej. Lácteos, Panadería, Bebidas..." />
+          </div>
+          <div class="form-group full">
+            <label for="catIcon">Icono / Emoji *</label>
+            <input id="catIcon" type="text" required placeholder="Ej. 🥛 o 🍞" value="📦" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Categoría</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: REGISTRAR ENTRADA DE STOCK -->
+  <div class="modal-backdrop hidden" id="modalStockEntry">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalStockEntryTitle">
+      <div class="modal-head">
+        <h3 id="modalStockEntryTitle">📥 Registrar Entrada de Stock</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+      <form id="stockEntryForm">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="stockEntryProduct">Selecciona el Producto *</label>
+            <select id="stockEntryProduct" required></select>
+          </div>
+          <div class="form-group full">
+            <label for="stockEntryQty">Cantidad de Unidades a Ingresar *</label>
+            <input id="stockEntryQty" type="number" min="1" step="1" required placeholder="Ej. 12" />
+          </div>
+          <div class="form-group full">
+            <label for="stockEntryNote">Motivo / Proveedor</label>
+            <input id="stockEntryNote" type="text" placeholder="Ej. Compra a distribuidor mayorista" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cancelar</button>
+          <button type="submit" class="btn btn-success">＋ Registrar Entrada</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: PAGO PRESENCIAL (POS) -->
+  <div class="modal-backdrop hidden" id="modalPayment">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalPayTitle">
+      <div class="modal-head">
+        <h3 id="modalPayTitle">Cobrar Venta Presencial</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+
+      <div style="text-align:center;margin-bottom:14px;">
+        <span style="font-size:13px;color:var(--muted);">Total de la compra:</span>
+        <div style="font-size:32px;font-weight:900;color:var(--primary);" id="payModalTotal">S/ 0.00</div>
+      </div>
+
+      <div class="payment-tabs">
+        <button type="button" class="pay-tab tab-efectivo active" data-method="Efectivo" onclick="setPosPaymentMethod('Efectivo')">
+          <span class="pay-tab-icon">💵</span>
+          <span>Efectivo</span>
+        </button>
+        <button type="button" class="pay-tab tab-yape" data-method="Yape" onclick="setPosPaymentMethod('Yape')">
+          <span class="pay-tab-icon">🟣</span>
+          <span>Yape</span>
+        </button>
+        <button type="button" class="pay-tab tab-plin" data-method="Plin" onclick="setPosPaymentMethod('Plin')">
+          <span class="pay-tab-icon">🔵</span>
+          <span>Plin</span>
+        </button>
+      </div>
+
+      <!-- Panel: EFECTIVO -->
+      <div class="pay-content" id="payPanelCash">
+        <div class="form-group">
+          <label for="cashReceived">Monto en Efectivo Recibido (S/)</label>
+          <input type="number" id="cashReceived" step="0.50" min="0" style="font-size:18px;font-weight:800;" oninput="calculateCashChange()" />
+        </div>
+        <div class="cash-quick-btns">
+          <button type="button" class="cash-q-btn" onclick="setQuickCash('exact')">Monto Exacto</button>
+          <button type="button" class="cash-q-btn" onclick="setQuickCash(10)">S/ 10</button>
+          <button type="button" class="cash-q-btn" onclick="setQuickCash(20)">S/ 20</button>
+          <button type="button" class="cash-q-btn" onclick="setQuickCash(50)">S/ 50</button>
+          <button type="button" class="cash-q-btn" onclick="setQuickCash(100)">S/ 100</button>
+        </div>
+        <div class="change-display" id="changeDisplayRow">
+          <span style="font-weight:700;color:var(--ink);">Vuelto a entregar:</span>
+          <span class="change-amount" id="changeAmount">S/ 0.00</span>
+        </div>
+      </div>
+
+      <!-- Panel: YAPE -->
+      <div class="pay-content hidden" id="payPanelYape">
+        <div class="qr-box">
+          <div style="font-weight:900;color:var(--yape);font-size:16px;">🟣 Escanea con tu App Yape</div>
+          <div class="qr-code-display" id="modalYapeQr"></div>
+          <div class="qr-info-pill">
+            <span>📱 Celular:</span>
+            <strong id="modalYapeNumber">987 654 321</strong>
+          </div>
+          <div style="font-size:12.5px;color:var(--muted);">
+            Titular: <strong id="modalYapeOwner">José Pepe Morales</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: PLIN -->
+      <div class="pay-content hidden" id="payPanelPlin">
+        <div class="qr-box">
+          <div style="font-weight:900;color:#0891b2;font-size:16px;">🔵 Escanea con tu App Plin</div>
+          <div class="qr-code-display" id="modalPlinQr"></div>
+          <div class="qr-info-pill">
+            <span>📱 Celular:</span>
+            <strong id="modalPlinNumber">987 654 321</strong>
+          </div>
+          <div style="font-size:12.5px;color:var(--muted);">
+            Titular: <strong id="modalPlinOwner">José Pepe Morales</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cancelar</button>
+        <button type="button" class="btn btn-success btn-lg" id="btnConfirmSale" onclick="confirmPosSale()">
+          ✓ Confirmar Venta y Generar Boleta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: CARRITO Y CHECKOUT TIENDA ONLINE (CLIENTE) -->
+  <div class="modal-backdrop hidden" id="modalOnlineCart">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalOnlineCartTitle" style="max-width:680px;">
+      <div class="modal-head">
+        <h3 id="modalOnlineCartTitle">🛍️ Finalizar Pedido Online</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+
+      <!-- Resumen de Productos -->
+      <div style="font-weight:800;font-size:14px;margin-bottom:10px;">Resumen de tu compra:</div>
+      <div class="cart-items" id="onlineCartItems" style="max-height:180px;"></div>
+
+      <div class="cart-summary" style="margin-bottom:14px;">
+        <div class="summary-row total">
+          <span>TOTAL DE LA COMPRA:</span>
+          <span id="onlineCartTotalAmount" style="color:var(--primary);font-size:22px;">S/ 0.00</span>
+        </div>
+      </div>
+
+      <!-- PASO 1: Datos de Contacto -->
+      <div style="border-top:1px solid var(--line-light);padding-top:14px;margin-top:14px;">
+        <div style="font-weight:800;font-size:14px;margin-bottom:10px;">1. Datos de contacto:</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="onlineCustName">Tu Nombre Completo *</label>
+            <input type="text" id="onlineCustName" required placeholder="Ej. María Flores" />
+          </div>
+          <div class="form-group full">
+            <label for="onlineCustPhone">Número de WhatsApp (para seguimiento de tu pedido) *</label>
+            <input type="tel" id="onlineCustPhone" required placeholder="Ej. 987654321" />
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: Método de Entrega -->
+      <div style="border-top:1px solid var(--line-light);padding-top:14px;margin-top:14px;">
+        <div style="font-weight:800;font-size:14px;margin-bottom:8px;">2. Selecciona el método de entrega:</div>
+        <div class="delivery-options-grid">
+          <div class="delivery-opt-card active" id="optDeliveryDomicilio" onclick="selectDeliveryMethod('delivery')">
+            <div class="delivery-opt-header">
+              <span>🛵</span>
+              <span>Envío a Domicilio</span>
+            </div>
+            <span class="delivery-opt-desc">Llevamos el pedido a tu dirección</span>
+          </div>
+          <div class="delivery-opt-card" id="optDeliveryRecojo" onclick="selectDeliveryMethod('recojo')">
+            <div class="delivery-opt-header">
+              <span>🏪</span>
+              <span>Recojo en Bodega</span>
+            </div>
+            <span class="delivery-opt-desc">Recoges en nuestro local físico</span>
+          </div>
+        </div>
+
+        <div id="deliveryAddressGroup" class="form-group full" style="margin-top:8px;">
+          <label for="onlineCustAddress">Dirección exacta de entrega *</label>
+          <input type="text" id="onlineCustAddress" placeholder="Ej. Av. Los Pinos 123, Dpto 201 - Urb. El Bosque" />
+        </div>
+        <div id="pickupStoreInfoGroup" class="form-group full hidden" style="margin-top:8px;">
+          <div style="background:#f1f5f9;border:1px solid #cbd5e1;border-radius:12px;padding:12px;font-size:12.5px;color:#334155;">
+            📍 <b>Dirección de recojo:</b> <span id="checkoutPickupAddressText">Av. Las Gardenias 452, Urb. El Bosque - Lima</span><br>
+            Horario de atención: Lunes a Domingo de 8:00 AM a 10:00 PM.
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 3: Selección de Método de Pago (Configurados y Activos) -->
+      <div style="border-top:1px solid var(--line-light);padding-top:14px;margin-top:14px;">
+        <div style="font-weight:800;font-size:14px;margin-bottom:10px;">3. Selecciona tu método de pago:</div>
+        
+        <!-- Pestañas de Métodos Activos -->
+        <div class="payment-tabs" id="onlineActivePaymentTabs"></div>
+
+        <!-- Caja de Datos de Pago del Método Seleccionado -->
+        <div id="onlinePaymentDetailsBox" style="margin-top:12px;"></div>
+      </div>
+
+      <!-- PASO 4: Adjuntar Captura del Comprobante -->
+      <div style="border-top:1px solid var(--line-light);padding-top:14px;margin-top:14px;">
+        <div style="font-weight:800;font-size:14px;margin-bottom:8px;">4. Adjunta tu comprobante de pago:</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">
+          Sube la captura de tu transferencia (Yape, Plin, BCP, BBVA, etc.) para que el administrador verifique tu pago. Formatos: JPG, JPEG, PNG (máx. 5 MB).
+        </p>
+
+        <div class="upload-dropzone" id="voucherDropzone" onclick="$('clientVoucherFile').click()">
+          <input type="file" id="clientVoucherFile" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleClientVoucherSelect(this)" />
+          <div id="voucherDropzoneContent">
+            <span style="font-size:28px;">📷</span>
+            <div style="font-weight:700;font-size:13px;margin-top:4px;">Haz clic para seleccionar la captura del comprobante</div>
+            <small style="color:var(--muted);">Formatos admitidos: JPG, PNG, WEBP</small>
+          </div>
+        </div>
+
+        <div id="voucherSelectedPreview" class="hidden" style="margin-top:12px;display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px 14px;">
+          <img id="voucherSelectedImg" style="width:48px;height:48px;border-radius:8px;object-fit:cover;" alt="Comprobante" />
+          <div style="flex:1;min-width:0;">
+            <strong id="voucherSelectedName" style="font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">comprobante.jpg</strong>
+            <small id="voucherSelectedSize" style="color:var(--muted);font-size:11px;">150 KB</small>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="clearSelectedVoucher()" style="color:var(--danger);border-color:#fecaca;">Quitar</button>
+        </div>
+
+        <div style="margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.4;">
+          ℹ️ <b>Aviso:</b> El pedido quedará registrado en estado <b>«Pendiente de verificación»</b>. El administrador verificará el ingreso en su cuenta bancaria antes de confirmar el pago.
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Seguir Comprando</button>
+        <button type="button" class="btn btn-primary btn-lg" id="btnSubmitOnlineOrder" onclick="processOnlineCheckout()">
+          Enviar Pedido y Comprobante →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: SEGUIMIENTO DEL PEDIDO DEL CLIENTE (SIN BOTÓN DE AUTO-APROBACIÓN) -->
+  <div class="modal-backdrop hidden" id="modalClientOrderTracking">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTrackingTitle" style="max-width:640px;">
+      <div class="modal-head">
+        <h3 id="modalTrackingTitle">📦 Seguimiento de tu Pedido</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+
+      <!-- Cabecera del Pedido -->
+      <div class="tracking-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <h3 id="trackOrderCode">ORD-00104</h3>
+            <p id="trackOrderDate">Fecha de pedido</p>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11.5px;color:#ded8ff;">Total:</span>
+            <div id="trackOrderTotal" style="font-size:22px;font-weight:900;">S/ 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Estados Independientes -->
+      <div class="tracking-status-grid">
+        <div class="tracking-status-card">
+          <small>Estado del Pago</small>
+          <div id="trackPaymentStatusBadge"><span class="badge b-pay-pendiente">Pendiente de verificación</span></div>
+        </div>
+        <div class="tracking-status-card">
+          <small>Estado del Pedido</small>
+          <div id="trackOrderStatusBadge"><span class="badge b-ord-pendiente">Pendiente</span></div>
+        </div>
+        <div class="tracking-status-card">
+          <small>Estado de Entrega</small>
+          <div id="trackDeliveryStatusBadge"><span class="badge b-del-pendiente">Pendiente</span></div>
+        </div>
+      </div>
+
+      <!-- Alerta si el pago fue RECHAZADO -->
+      <div id="trackRejectionBox" class="rejection-alert-box hidden">
+        <span style="font-size:24px;">❌</span>
+        <div>
+          <h4>Pago Rechazado por el Administrador</h4>
+          <p id="trackRejectionReasonText">Motivo del rechazo...</p>
+          <div style="margin-top:8px;font-size:12px;font-weight:700;">
+            Por favor, adjunta un nuevo comprobante corregido a continuación para que el administrador reevalúe tu pago.
+          </div>
+        </div>
+      </div>
+
+      <!-- Información Explicativa del Estado de Pago -->
+      <div id="trackPaymentInfoMsg" style="padding:14px;border-radius:12px;background:#f8fafc;border:1px solid var(--line);font-size:12.5px;color:#334155;line-height:1.5;margin-bottom:16px;">
+        <!-- Mensaje dinámico según estado -->
+      </div>
+
+      <!-- Comprobante Adjunto y Reemplazo de Comprobante -->
+      <div style="border-top:1px solid var(--line-light);padding-top:14px;">
+        <div style="font-weight:800;font-size:13.5px;margin-bottom:10px;">Comprobante de Pago:</div>
+        
+        <div id="trackVoucherDisplayArea"></div>
+
+        <!-- Formulario para Subir o Reemplazar Comprobante (Habilitado si fue rechazado o si no tenía) -->
+        <div id="trackReplaceVoucherArea" class="hidden" style="margin-top:14px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;padding:14px;">
+          <strong style="font-size:12.5px;display:block;margin-bottom:6px;">📤 Subir o Reemplazar Comprobante:</strong>
+          <input type="file" id="reuploadVoucherInput" accept="image/png,image/jpeg,image/jpg,image/webp" onchange="handleReuploadVoucherChange(this)" style="font-size:12px;" />
+          <div id="reuploadPreviewArea" class="hidden" style="margin-top:10px;display:flex;align-items:center;gap:10px;">
+            <img id="reuploadPreviewImg" style="width:44px;height:44px;border-radius:8px;object-fit:cover;" alt="Preview" />
+            <span id="reuploadFileName" style="font-size:12px;color:var(--muted);">nuevo_comprobante.jpg</span>
+            <button type="button" class="btn btn-primary btn-sm" onclick="submitReuploadedVoucher()">Enviar Nuevo Comprobante</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción del Cliente (Sin botón de auto-aprobación) -->
+      <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:20px;">
+        <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cerrar / Seguir Comprando</button>
+        <button type="button" class="btn btn-success" id="btnTrackSendWhatsApp" onclick="openWhatsAppForCurrentTrackingOrder()" style="background:#25d366;border-color:#25d366;color:#ffffff;font-weight:800;">
+          📲 Enviar Comprobante por WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: VISOR DE COMPROBANTE EN ALTA RESOLUCIÓN (ADMIN / CLIENTE) -->
+  <div class="modal-backdrop hidden" id="modalViewVoucher">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalVoucherTitle" style="max-width:680px;">
+      <div class="modal-head">
+        <h3 id="modalVoucherTitle">📄 Comprobante de Pago Adjuntado</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+
+      <div class="voucher-modal-viewer">
+        <div class="voucher-full-box">
+          <img id="viewerFullImage" class="voucher-full-img" src="" alt="Comprobante en tamaño completo" />
+        </div>
+
+        <div class="voucher-meta-card">
+          <div>
+            <span style="color:var(--muted);display:block;">N.º Pedido:</span>
+            <strong id="viewerOrderCode">ORD-00000</strong>
+          </div>
+          <div>
+            <span style="color:var(--muted);display:block;">Cliente:</span>
+            <strong id="viewerCustomerName">Cliente</strong>
+          </div>
+          <div>
+            <span style="color:var(--muted);display:block;">Monto Total:</span>
+            <strong id="viewerAmount" style="color:var(--primary);">S/ 0.00</strong>
+          </div>
+          <div>
+            <span style="color:var(--muted);display:block;">Subido en:</span>
+            <span id="viewerUploadTime">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="justify-content:space-between;margin-top:16px;">
+        <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cerrar Visor</button>
+        <div id="viewerAdminActions" style="display:flex;gap:8px;">
+          <!-- Botones inyectados dinámicamente si es administrador -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 8: RECHAZAR PAGO (SOLICITAR MOTIVO AL ADMINISTRADOR) -->
+  <div class="modal-backdrop hidden" id="modalRejectPayment">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalRejectTitle" style="max-width:520px;">
+      <div class="modal-head">
+        <h3 id="modalRejectTitle" style="color:var(--danger);">❌ Rechazar Pago de Pedido</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5;">
+        Indica el motivo por el cual el pago del pedido <strong id="rejectModalOrderCode">ORD-00000</strong> no pudo verificarse. El cliente verá este motivo y podrá corregir o reemplazar su comprobante.
+      </p>
+
+      <!-- Motivos rápidos -->
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px;">Motivos frecuentes (haz clic para seleccionar):</div>
+      <div class="rejection-quick-tags">
+        <button type="button" class="quick-tag-btn" onclick="setRejectionReasonTag('Monto transferido no coincide con el total')">Monto no coincide</button>
+        <button type="button" class="quick-tag-btn" onclick="setRejectionReasonTag('Comprobante ilegible / borroso')">Comprobante ilegible</button>
+        <button type="button" class="quick-tag-btn" onclick="setRejectionReasonTag('Transferencia no recibida en cuenta bancaria')">No recibida en cuenta</button>
+        <button type="button" class="quick-tag-btn" onclick="setRejectionReasonTag('Titular de transferencia no coincide')">Titular no coincide</button>
+        <button type="button" class="quick-tag-btn" onclick="setRejectionReasonTag('Número de operación o constancia duplicada')">Operación duplicada</button>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <label for="rejectionReasonInput">Motivo del Rechazo *</label>
+        <textarea id="rejectionReasonInput" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);font-size:13px;" placeholder="Describe detalladamente por qué el pago fue rechazado..."></textarea>
+      </div>
+
+      <div class="modal-actions" style="margin-top:16px;">
+        <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="confirmRejectPaymentSubmit()" style="background:var(--danger);border-color:var(--danger);">
+          ❌ Confirmar Rechazo de Pago
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 9: HISTORIAL DE PEDIDOS DEL CLIENTE -->
+  <div class="modal-backdrop hidden" id="modalClientOrdersList">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalClientOrdersTitle" style="max-width:760px;">
+      <div class="modal-head">
+        <h3 id="modalClientOrdersTitle">📦 Mis Pedidos Realizados</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+
+      <div class="panel" style="box-shadow:none;border:none;padding:0;">
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>N.º Pedido</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Método</th>
+                <th>Estado Pago</th>
+                <th>Estado Pedido</th>
+                <th>Entrega</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="clientOrdersListTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:16px;">
+        <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 10: BOLETA DE VENTA / TICKET TÉRMICO -->
+  <div class="modal-backdrop hidden" id="modalBoleta">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalBoletaTitle">
+      <div class="modal-head no-print">
+        <h3 id="modalBoletaTitle">🧾 Comprobante de Pago Generado</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+
+      <!-- Contenedor del Ticket Térmico -->
+      <div id="boletaTicketContainer"></div>
+
+      <!-- Acciones de la Boleta con WhatsApp como Canal Principal -->
+      <div class="modal-actions no-print" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-outline btn-sm" id="btnDownloadBoleta" onclick="downloadBoletaTxt()">📄 Descargar Boleta</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btnCopyBoleta" onclick="copyBoletaText()">📋 Copiar Texto</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-success btn-sm" id="btnWhatsappBoleta" onclick="openCurrentBoletaWhatsApp()" style="background:#25d366;border-color:#25d366;color:#ffffff;font-weight:800;">
+            📲 Enviar por WhatsApp
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnPrintBoleta" onclick="window.print()">🖨️ Imprimir Boleta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 11: CREAR CUENTA DE CAJERO (ADMIN ONLY) -->
+  <div class="modal-backdrop hidden" id="modalCashier">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalCashierTitle">
+      <div class="modal-head">
+        <h3 id="modalCashierTitle">Crear Cuenta de Cajero</h3>
+        <button class="close" data-close-modal onclick="closeAllModals()">×</button>
+      </div>
+      <form id="cashierForm">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="cashierName">Nombre Completo del Cajero *</label>
+            <input type="text" id="cashierName" required placeholder="Ej. Ana Lucía Salas" />
+          </div>
+          <div class="form-group">
+            <label for="cashierUser">Nombre de Usuario *</label>
+            <input type="text" id="cashierUser" required placeholder="Ej. cajero2" autocomplete="username" />
+          </div>
+          <div class="form-group">
+            <label for="cashierPass">Contraseña *</label>
+            <input type="password" id="cashierPass" required placeholder="Mínimo 3 caracteres" autocomplete="new-password" />
+          </div>
+          <div class="form-group full">
+            <label for="cashierPhone">Celular / WhatsApp *</label>
+            <input type="tel" id="cashierPhone" required placeholder="Ej. 988223344" />
+          </div>
+          <div class="form-group full">
+            <label for="cashierEmail">Correo Electrónico (opcional)</label>
+            <input type="email" id="cashierEmail" placeholder="Ej. ana.cajera@bodegacontrol.pe" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-close-modal onclick="closeAllModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Crear Cuenta de Cajero</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- NOTIFICACIÓN TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- SCRIPTS -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
