@@ -83,6 +83,40 @@
 </div>
 
 
+<div id="createStoreForm" class="hidden" style="margin-top:20px;">
+  <h3>🏪 Registra tu bodega</h3>
+
+  <label for="storeName">Nombre de tu bodega</label>
+  <input
+    type="text"
+    id="storeName"
+    placeholder="Ej. Bodega Don Pepe"
+    maxlength="60"
+    required
+  />
+
+  <label for="storeAddress" style="display:block;margin-top:12px;">
+    Dirección
+  </label>
+  <input
+    type="text"
+    id="storeAddress"
+    placeholder="Ej. Av. Los Olivos 123"
+    maxlength="120"
+  />
+
+  <button
+    type="button"
+    id="saveStoreBtn"
+    class="login-btn"
+    style="margin-top:16px;"
+  >
+    Crear bodega
+  </button>
+
+  <p id="storeMsg" class="login-msg" role="status"></p>
+</div>
+
       <div class="demo-hint" style="margin-top:22px;">
         <span>🔒</span>
         <div>
