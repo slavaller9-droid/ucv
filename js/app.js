@@ -277,7 +277,6 @@ for (const membresiaDoc of membresiasSnapshot.docs) {
   }
 }
 
-
 const myStoresList = $('myStoresList');
 
 if (myStoresList) {
@@ -288,29 +287,50 @@ if (myStoresList) {
   } else {
     misBodegas.forEach((bodega) => {
       const card = document.createElement('div');
-      card.style.cssText =
-        'padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:12px;';
 
-      const nombre = document.createElement('h4');
+      card.style.cssText = `
+        padding:22px;
+        margin:16px 0;
+        border:1px solid #e2e8f0;
+        border-radius:16px;
+        background:#ffffff;
+        box-shadow:0 3px 10px rgba(0,0,0,0.05);
+      `;
+
+      const nombre = document.createElement('h3');
       nombre.textContent = '🏪 ' + bodega.nombre;
+      nombre.style.cssText = 'font-size:22px;margin:0 0 12px;';
 
       const direccion = document.createElement('p');
       direccion.textContent = '📍 ' + (bodega.direccion || 'Sin dirección');
+      direccion.style.cssText = 'font-size:16px;color:#475569;';
 
       const rol = document.createElement('p');
-      rol.textContent = '👤 Rol: ' +
+      rol.textContent = '👤 ' +
         (bodega.rol === 'admin' ? 'Administradora' : 'Cajera');
+      rol.style.cssText = 'font-size:16px;color:#475569;';
 
-      card.append(nombre, direccion, rol);
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.textContent = 'ACCESO EN PREPARACIÓN';
+      boton.disabled = true;
+      boton.style.cssText = `
+        width:100%;
+        padding:15px;
+        margin-top:12px;
+        border:0;
+        border-radius:10px;
+        background:#cbd5e1;
+        color:#334155;
+        font-size:15px;
+        font-weight:bold;
+        cursor:not-allowed;
+      `;
+
+      card.append(nombre, direccion, rol, boton);
       myStoresList.appendChild(card);
     });
   }
-}
-
-if (createStoreBtn) {
-  createStoreBtn.textContent = misBodegas.length > 0
-    ? '🏪 Crear otra bodega'
-    : '🏪 Crear mi bodega';
 }
 
 
