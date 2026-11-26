@@ -252,6 +252,33 @@ function initAuth() {
         photo: user.photoURL || ''
       };
 
+      
+// Buscar las bodegas a las que pertenece el usuario
+const membresiasSnapshot = await db.collection('membresias')
+  .where('usuarioUid', '==', user.uid)
+  .where('estado', '==', 'activo')
+  .get();
+
+const misBodegas = [];
+
+for (const membresiaDoc of membresiasSnapshot.docs) {
+  const membresia = membresiaDoc.data();
+
+  const bodegaDoc = await db.collection('bodegas')
+    .doc(membresia.bodegaId)
+    .get();
+
+  if (bodegaDoc.exists) {
+    misBodegas.push({
+      id: bodegaDoc.id,
+      ...bodegaDoc.data(),
+      rol: membresia.rol
+    });
+  }
+}
+
+console.log('Mis bodegas:', misBodegas);
+
       // No asignar roles automáticamente
       $('app')?.classList.add('hidden');
       $('clientStoreApp')?.classList.add('hidden');
