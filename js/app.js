@@ -93,190 +93,108 @@ function initDateDisplay() {
   if (el) el.textContent = str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// ==================== AUTENTICACIÓN, REGISTRO Y ROLES ====================
+
+// ==================== AUTENTICACIÓN CON GOOGLE ====================
+
 function initAuth() {
-  const loginForm = $('loginForm');
-  const registerForm = $('registerForm');
-  const logoutBtn = $('logoutBtn');
-  const togglePass = $('togglePass');
+  const googleBtn = $('googleLoginBtn');
+  const loginMsg = $('loginMsg');
+  const authLoading = $('authLoading');
+  const accountSetup = $('accountSetup');
 
-  // Recuperar sesión guardada
-  const savedUser = localStorage.getItem('bc_session_user');
-  const savedRole = localStorage.getItem('bc_session_role');
-
-  if (savedUser && savedRole) {
-    const userObj = users.find((u) => u.username === savedUser) || {
-      name: savedUser,
-      username: savedUser,
-      role: savedRole
-    };
-    loginSuccess(userObj, false);
+  if (!window.auth || !window.db) {
+    if (loginMsg) {
+      loginMsg.textContent = 'No se pudo conectar con Firebase.';
+    }
+    return;
   }
 
-  // Submit Login
-  if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const uInput = $('loginUser').value.trim();
-      const pInput = $('loginPass').value.trim();
-      const msg = $('loginMsg');
+  // Iniciar sesión con Google
+  if (googleBtn) {
+    googleBtn.addEventListener('click', async () => {
+      try {
+        googleBtn.disabled = true;
+        if (loginMsg) loginMsg.textContent = '';
+        if (authLoading) authLoading.classList.remove('hidden');
 
-      if (!uInput || !pInput) {
-        if (msg) msg.textContent = 'Por favor ingresa usuario y contraseña.';
-        return;
-      }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
 
-      // Buscar usuario
-      let user = users.find((x) => x.username.toLowerCase() === uInput.toLowerCase());
+      } catch (error) {
+        console.error('Error al iniciar sesión:', error);
 
-      // Permitir login si coincide o para pruebas si la contraseña es válida
-      if (user) {
-        if (user.password && user.password !== pInput) {
-          if (msg) msg.textContent = 'Contraseña incorrecta. Intenta nuevamente.';
-          return;
+        if (loginMsg) {
+          loginMsg.textContent =
+            'No se pudo iniciar sesión. Inténtalo nuevamente.';
         }
-      } else {
-        // Si no está registrado pero eligió perfil de prueba:
-        user = {
-          id: Date.now(),
-          name: uInput,
-          username: uInput,
-          role: currentRole,
-          roleLabel: currentRole === 'admin' ? 'Administrador' : currentRole === 'cajero' ? 'Cajero' : 'Cliente'
-        };
-        users.push(user);
-        Storage.saveUsers(users);
-      }
 
-      loginSuccess(user, true);
+        if (authLoading) authLoading.classList.add('hidden');
+        googleBtn.disabled = false;
+      }
     });
   }
 
-  // Submit Registro de Cliente
-  if (registerForm) {
-    registerForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = $('regName').value.trim();
-      const lastName = $('regLastName').value.trim();
-      const phone = $('regPhone').value.trim();
-      const email = $('regEmail').value.trim();
-      const username = $('regUser').value.trim().toLowerCase();
-      const password = $('regPass').value.trim();
-      const regMsg = $('regMsg');
+  // Comprobar si existe una sesión de Google
+  auth.onAuthStateChanged(async (user) => {
+    if (authLoading) authLoading.classList.add('hidden');
 
-      if (!name || !lastName || !phone || !username || !password) {
-        if (regMsg) regMsg.textContent = 'Por favor completa todos los campos obligatorios.';
-        return;
-      }
+    if (!user) {
+      currentUser = null;
 
-      // Verificar si el usuario ya existe
-      if (users.some((u) => u.username.toLowerCase() === username)) {
-        if (regMsg) regMsg.textContent = `El nombre de usuario "${username}" ya está registrado. Elige otro.`;
-        return;
-      }
+      $('app')?.classList.add('hidden');
+      $('clientStoreApp')?.classList.add('hidden');
+      $('loginPage')?.classList.remove('hidden');
 
-      const newClient = {
-        id: Date.now(),
-        name: `${name} ${lastName}`,
-        username,
-        password,
-        role: 'cliente',
-        roleLabel: 'Cliente',
-        phone,
-        email: email || `${username}@correo.com`
+      if (accountSetup) accountSetup.classList.add('hidden');
+      if (googleBtn) googleBtn.disabled = false;
+
+      return;
+    }
+
+    try {
+      // Guardar o actualizar el perfil del usuario
+      await db.collection('usuarios').doc(user.uid).set({
+        uid: user.uid,
+        nombre: user.displayName || '',
+        correo: user.email || '',
+        foto: user.photoURL || '',
+        fechaActualizacion:
+          firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      currentUser = {
+        uid: user.uid,
+        name: user.displayName || 'Usuario',
+        email: user.email || '',
+        photo: user.photoURL || ''
       };
 
-      users.push(newClient);
-      Storage.saveUsers(users);
+      // No asignar roles automáticamente
+      $('app')?.classList.add('hidden');
+      $('clientStoreApp')?.classList.add('hidden');
+      $('loginPage')?.classList.remove('hidden');
 
-      showToast(`¡Cuenta de cliente creada exitosamente! Bienvenido, ${name}.`);
-      loginSuccess(newClient, true);
-    });
-  }
+      if (accountSetup) accountSetup.classList.remove('hidden');
+      if (googleBtn) googleBtn.classList.add('hidden');
 
-  if (togglePass) {
-    togglePass.addEventListener('click', () => {
-      const input = $('loginPass');
-      input.type = input.type === 'password' ? 'text' : 'password';
-    });
-  }
+    } catch (error) {
+      console.error('Error al guardar el perfil:', error);
 
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      logoutUser();
-    });
-  }
-}
-
-function loginSuccess(user, showWelcomeToast = true) {
-  currentUser = user;
-  currentRole = user.role;
-
-  localStorage.setItem('bc_session_user', user.username);
-  localStorage.setItem('bc_session_role', user.role);
-
-  $('loginPage')?.classList.add('hidden');
-
-  // Enrutar automáticamente según el rol del usuario:
-  if (user.role === 'cliente') {
-    // Interfaz de Tienda Online Standalone (separada, sin panel administrativo)
-    $('app')?.classList.add('hidden');
-    $('clientStoreApp')?.classList.remove('hidden');
-    document.body.classList.remove('is-cajero');
-
-    const clientUserEl = $('clientUserNameText');
-    if (clientUserEl) clientUserEl.textContent = user.name || user.username;
-
-    // Autocompletar datos en checkout
-    if ($('onlineCustName')) $('onlineCustName').value = user.name || '';
-    if ($('onlineCustPhone')) $('onlineCustPhone').value = user.phone || '';
-
-    renderClientProducts();
-    renderClientCartUI();
-  } else {
-    // Panel de Personal (Administrador o Cajero)
-    $('clientStoreApp')?.classList.add('hidden');
-    $('app')?.classList.remove('hidden');
-
-    // Aplicar restricciones de cajero si corresponde
-    const isCajero = user.role === 'cajero';
-    document.body.classList.toggle('is-cajero', isCajero);
-
-    const sideRoleBadge = $('sideRoleBadge');
-    const sideUserDesc = $('sideUserDesc');
-    const sideUser = $('sideUser');
-    const avatar = $('avatar');
-
-    if (sideUser) sideUser.textContent = user.name || user.username;
-    if (avatar) avatar.textContent = (user.name || user.username).slice(0, 2).toUpperCase();
-
-    if (isCajero) {
-      if (sideRoleBadge) sideRoleBadge.textContent = 'Panel Cajero';
-      if (sideUserDesc) sideUserDesc.textContent = 'Cajero de Bodega';
-      // Por defecto para cajero abrir vista de Ventas POS
-      switchView('ventas');
-    } else {
-      if (sideRoleBadge) sideRoleBadge.textContent = 'Panel Administrador';
-      if (sideUserDesc) sideUserDesc.textContent = 'Dueño / Admin';
-      switchView('inicio');
+      if (loginMsg) {
+        loginMsg.textContent =
+          'Tu sesión inició, pero no se pudo guardar tu perfil.';
+      }
     }
-  }
-
-  if (showWelcomeToast) {
-    showToast(`¡Bienvenido a BodegaControl, ${user.name || user.username}!`);
-  }
+  });
 }
 
-window.logoutUser = function () {
-  if (confirm('¿Deseas cerrar tu sesión?')) {
-    localStorage.removeItem('bc_session_user');
-    localStorage.removeItem('bc_session_role');
-    currentUser = null;
-    $('app')?.classList.add('hidden');
-    $('clientStoreApp')?.classList.add('hidden');
-    $('loginPage')?.classList.remove('hidden');
-    document.body.classList.remove('is-cajero');
+// Cerrar sesión de Firebase
+window.logoutUser = async function () {
+  try {
+    await auth.signOut();
     showToast('Sesión cerrada.');
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
   }
 };
 
@@ -284,38 +202,6 @@ window.logoutClient = function () {
   window.logoutUser();
 };
 
-window.switchAuthTab = function (tab) {
-  const isLogin = tab === 'login';
-  $('tabBtnLogin')?.classList.toggle('active', isLogin);
-  $('tabBtnRegister')?.classList.toggle('active', !isLogin);
-
-  $('loginForm')?.classList.toggle('hidden', !isLogin);
-  $('registerForm')?.classList.toggle('hidden', isLogin);
-
-  if ($('loginMsg')) $('loginMsg').textContent = '';
-  if ($('regMsg')) $('regMsg').textContent = '';
-};
-
-window.setLoginProfile = function (role) {
-  currentRole = role;
-  $('btnRoleAdmin')?.classList.toggle('active', role === 'admin');
-  $('btnRoleCajero')?.classList.toggle('active', role === 'cajero');
-  $('btnRoleClient')?.classList.toggle('active', role === 'cliente');
-
-  const uInput = $('loginUser');
-  const pInput = $('loginPass');
-
-  if (role === 'admin') {
-    if (uInput) uInput.value = 'donpepe';
-    if (pInput) pInput.value = '123';
-  } else if (role === 'cajero') {
-    if (uInput) uInput.value = 'cajero1';
-    if (pInput) pInput.value = '123';
-  } else {
-    if (uInput) uInput.value = 'cliente';
-    if (pInput) pInput.value = '123';
-  }
-};
 
 window.openStorefrontView = function () {
   // Permite a admin/cajero abrir y explorar la tienda online de clientes
