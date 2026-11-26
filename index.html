@@ -9,125 +9,75 @@
 </head>
 <body>
 
-  <!-- ==================== PANTALLA DE LOGIN Y REGISTRO ==================== -->
-  <section class="login-page" id="loginPage">
-    <div class="grid-glow"></div>
-    <div class="login-layout">
-      
-      <!-- Brand & Presentación -->
-      <div class="login-brand">
-        <div class="logo">🏪</div>
-        <div class="brand-kicker">BodegaControl · Sistema Integral</div>
-        <h1>Gestión de bodega y tienda online con boleta por WhatsApp.</h1>
-        <p>Control de inventario centralizado en tiempo real, ventas presenciales con POS, tienda virtual para clientes, verificación administrativa de pagos (Yape, Plin, Transferencias) y emisión automática de comprobantes directos a WhatsApp.</p>
-        <div class="login-features">
-          <span class="login-feature-tag">📦 Inventario Central</span>
-          <span class="login-feature-tag">🛍️ Tienda Online</span>
-          <span class="login-feature-tag">🛒 Ventas Presenciales</span>
-          <span class="login-feature-tag">🟣 Yape & Plin QR</span>
-          <span class="login-feature-tag">🏦 Transferencias BCP/BBVA</span>
-          <span class="login-feature-tag">🔍 Verificación de Pagos</span>
-          <span class="login-feature-tag">📲 Boleta por WhatsApp</span>
-        </div>
-      </div>
 
-      <!-- Tarjeta de Acceso / Registro -->
-      <div class="login-card">
-        <!-- Navegación de Pestañas: Iniciar Sesión / Crear Cuenta -->
-        <div class="auth-nav-tabs">
-          <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">Iniciar Sesión</button>
-          <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthTab('register')">Crear Cuenta (Cliente)</button>
-        </div>
+<!-- ==================== ACCESO BODEGACONTROL ==================== -->
+<section class="login-page" id="loginPage">
+  <div class="grid-glow"></div>
 
-        <!-- FORMULARIO 1: INICIAR SESIÓN -->
-        <form id="loginForm">
-          <h2>Bienvenido</h2>
-          <p class="sub">Elige tu perfil de acceso para ingresar al panel o a la tienda:</p>
+  <div class="login-layout">
+    <div class="login-brand">
+      <div class="logo">🏪</div>
+      <div class="brand-kicker">BodegaControl · Sistema Integral</div>
 
-          <!-- Selector de Perfil (Admin / Cajero / Cliente) -->
-          <div class="role-selector-pills">
-            <button type="button" class="role-pill active" id="btnRoleAdmin" onclick="setLoginProfile('admin')">👑 Administrador</button>
-            <button type="button" class="role-pill" id="btnRoleCajero" onclick="setLoginProfile('cajero')">🧑‍💻 Cajero</button>
-            <button type="button" class="role-pill" id="btnRoleClient" onclick="setLoginProfile('cliente')">🛍️ Cliente</button>
-          </div>
-          
-          <div class="field">
-            <label for="loginUser">Usuario</label>
-            <div class="input-wrap">
-              <input id="loginUser" type="text" placeholder="Ej. donpepe" autocomplete="username" value="donpepe" required />
-            </div>
-          </div>
+      <h1>Tu negocio, organizado en un solo lugar.</h1>
 
-          <div class="field">
-            <label for="loginPass">Contraseña</label>
-            <div class="input-wrap">
-              <input id="loginPass" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" value="123" required />
-              <button class="toggle-pass" id="togglePass" type="button" aria-label="Mostrar contraseña">👁️</button>
-            </div>
-          </div>
+      <p>
+        Administra tu inventario, registra ventas, controla tus pedidos
+        y ofrece tus productos en una tienda online.
+      </p>
 
-          <button class="login-btn" type="submit">Ingresar al Sistema</button>
-          
-          <div class="demo-hint">
-            <span>💡</span>
-            <div>
-              <strong>Perfiles de prueba disponibles:</strong><br>
-              • <b>Administrador:</b> donpepe / 123<br>
-              • <b>Cajero:</b> cajero1 / 123<br>
-              • <b>Cliente (Tienda):</b> cliente / 123
-            </div>
-          </div>
-          
-          <div class="login-msg" id="loginMsg"></div>
-        </form>
-
-        <!-- FORMULARIO 2: CREAR CUENTA DE CLIENTE -->
-        <form id="registerForm" class="hidden">
-          <h2>Crear Cuenta de Cliente</h2>
-          <p class="sub">Regístrate para comprar en nuestra tienda online y recibir tus boletas directas a tu WhatsApp.</p>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="regName">Nombres *</label>
-              <input id="regName" type="text" placeholder="Ej. Rosa" required />
-            </div>
-            <div class="form-group">
-              <label for="regLastName">Apellidos *</label>
-              <input id="regLastName" type="text" placeholder="Ej. Quispe" required />
-            </div>
-            <div class="form-group full">
-              <label for="regPhone">Número de Celular / WhatsApp *</label>
-              <input id="regPhone" type="tel" placeholder="Ej. 987654321" required />
-            </div>
-            <div class="form-group full">
-              <label for="regEmail">Correo Electrónico (opcional)</label>
-              <input id="regEmail" type="email" placeholder="Ej. rosa.quispe@email.com" />
-            </div>
-            <div class="form-group">
-              <label for="regUser">Nombre de Usuario *</label>
-              <input id="regUser" type="text" placeholder="Ej. rosi24" required autocomplete="username" />
-            </div>
-            <div class="form-group">
-              <label for="regPass">Contraseña *</label>
-              <input id="regPass" type="password" placeholder="Mínimo 3 caracteres" required autocomplete="new-password" />
-            </div>
-          </div>
-
-          <button class="login-btn" type="submit" style="margin-top:18px;">Crear mi Cuenta de Cliente</button>
-          
-          <div class="demo-hint" style="margin-top:14px;">
-            <span>ℹ️</span>
-            <div>
-              Las cuentas de cajero son creadas y gestionadas únicamente por el Administrador de la bodega desde su panel.
-            </div>
-          </div>
-
-          <div class="login-msg" id="regMsg"></div>
-        </form>
-
+      <div class="login-features">
+        <span class="login-feature-tag">📦 Inventario</span>
+        <span class="login-feature-tag">🛒 Ventas</span>
+        <span class="login-feature-tag">🛍️ Tienda online</span>
+        <span class="login-feature-tag">📊 Reportes</span>
+        <span class="login-feature-tag">🔐 Acceso seguro</span>
       </div>
     </div>
-  </section>
+
+    <div class="login-card">
+      <div style="text-align:center;">
+        <h2>¡Bienvenido a BodegaControl!</h2>
+        <p class="sub">
+          Inicia sesión con tu cuenta de Google para continuar.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="login-btn"
+        id="googleLoginBtn"
+        style="margin-top:24px;"
+      >
+        🔵 Continuar con Google
+      </button>
+
+      <div class="login-msg" id="loginMsg" role="status"></div>
+
+      <div id="authLoading" class="hidden"
+        style="text-align:center;margin-top:16px;">
+        Verificando tu cuenta...
+      </div>
+
+      <div id="accountSetup" class="hidden" style="margin-top:22px;">
+        <h3>¡Tu cuenta está lista!</h3>
+        <p class="sub">
+          Próximamente podrás crear tu bodega, unirte como cajero
+          mediante invitación o comprar como cliente.
+        </p>
+      </div>
+
+      <div class="demo-hint" style="margin-top:22px;">
+        <span>🔒</span>
+        <div>
+          <strong>Acceso protegido</strong><br>
+          Los permisos de administrador y cajero serán asignados
+          mediante autorización, no por elección del usuario.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
   <!-- ==================== 1. PANEL DE PERSONAL (ADMIN & CAJERO) ==================== -->
   <div class="app hidden" id="app">
