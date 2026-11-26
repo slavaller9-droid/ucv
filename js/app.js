@@ -123,10 +123,10 @@ function initAuth() {
       } catch (error) {
         console.error('Error al iniciar sesión:', error);
 
-        if (loginMsg) {
-          loginMsg.textContent =
-            'No se pudo iniciar sesión. Inténtalo nuevamente.';
-        }
+       if (loginMsg) {
+  loginMsg.textContent =
+    'Error: ' + (error.code || error.message);
+}
 
         if (authLoading) authLoading.classList.add('hidden');
         googleBtn.disabled = false;
