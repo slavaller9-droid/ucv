@@ -102,6 +102,89 @@ function initAuth() {
   const authLoading = $('authLoading');
   const accountSetup = $('accountSetup');
 
+  
+  // Crear una bodega y registrar a su propietario
+  const createStoreBtn = $('createStoreBtn');
+  const createStoreForm = $('createStoreForm');
+  const saveStoreBtn = $('saveStoreBtn');
+  const storeName = $('storeName');
+  const storeAddress = $('storeAddress');
+  const storeMsg = $('storeMsg');
+
+  if (createStoreBtn && createStoreForm) {
+    createStoreBtn.addEventListener('click', () => {
+      createStoreForm.classList.toggle('hidden');
+    });
+  }
+
+  if (saveStoreBtn) {
+    saveStoreBtn.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      const nombre = storeName.value.trim();
+      const direccion = storeAddress.value.trim();
+
+      if (!user) {
+        storeMsg.textContent = 'Inicia sesión primero.';
+        return;
+      }
+
+      if (!nombre) {
+        storeMsg.textContent = 'Escribe el nombre de tu bodega.';
+        storeName.focus();
+        return;
+      }
+
+      try {
+        saveStoreBtn.disabled = true;
+        storeMsg.textContent = 'Registrando tu bodega...';
+
+        // Crear identificador único
+        const bodegaRef = db.collection('bodegas').doc();
+
+        // Identificador único de la membresía
+        const membresiaRef = db.collection('membresias')
+          .doc(`${bodegaRef.id}_${user.uid}`);
+
+        // Guardar ambos documentos en una sola operación
+        const batch = db.batch();
+
+        batch.set(bodegaRef, {
+          nombre: nombre,
+          direccion: direccion,
+          propietarioUid: user.uid,
+          fechaCreacion:
+            firebase.firestore.FieldValue.serverTimestamp(),
+          estado: 'activa'
+        });
+
+        batch.set(membresiaRef, {
+          usuarioUid: user.uid,
+          bodegaId: bodegaRef.id,
+          rol: 'admin',
+          estado: 'activo',
+          fechaCreacion:
+            firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        await batch.commit();
+
+        storeMsg.textContent =
+          '¡Tu bodega fue creada correctamente! Ya eres su administrador.';
+
+        saveStoreBtn.textContent = 'Bodega creada';
+        showToast('¡Bodega registrada correctamente!');
+
+      } catch (error) {
+        console.error('Error al crear bodega:', error);
+
+        storeMsg.textContent =
+          'No se pudo crear la bodega: ' + error.message;
+
+        saveStoreBtn.disabled = false;
+      }
+    });
+  }
+
   if (!window.auth || !window.db) {
     if (loginMsg) {
       loginMsg.textContent = 'No se pudo conectar con Firebase.';
