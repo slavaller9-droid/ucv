@@ -277,7 +277,42 @@ for (const membresiaDoc of membresiasSnapshot.docs) {
   }
 }
 
-console.log('Mis bodegas:', misBodegas);
+
+const myStoresList = $('myStoresList');
+
+if (myStoresList) {
+  myStoresList.innerHTML = '';
+
+  if (misBodegas.length === 0) {
+    myStoresList.textContent = 'Todavía no tienes bodegas registradas.';
+  } else {
+    misBodegas.forEach((bodega) => {
+      const card = document.createElement('div');
+      card.style.cssText =
+        'padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:12px;';
+
+      const nombre = document.createElement('h4');
+      nombre.textContent = '🏪 ' + bodega.nombre;
+
+      const direccion = document.createElement('p');
+      direccion.textContent = '📍 ' + (bodega.direccion || 'Sin dirección');
+
+      const rol = document.createElement('p');
+      rol.textContent = '👤 Rol: ' +
+        (bodega.rol === 'admin' ? 'Administradora' : 'Cajera');
+
+      card.append(nombre, direccion, rol);
+      myStoresList.appendChild(card);
+    });
+  }
+}
+
+if (createStoreBtn) {
+  createStoreBtn.textContent = misBodegas.length > 0
+    ? '🏪 Crear otra bodega'
+    : '🏪 Crear mi bodega';
+}
+
 
       // No asignar roles automáticamente
       $('app')?.classList.add('hidden');
