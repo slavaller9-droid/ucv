@@ -28,12 +28,14 @@ let activeReuploadVoucher = null;
 let currentDeliveryMethod = 'delivery'; // 'delivery' | 'recojo'
 let tempMethodQrImages = { yape: '', plin: '', transferencia: '' };
 
-// Usuario y Sesión Actual
+// ==================== USUARIO Y SESIÓN ====================
 let currentUser = null;
-let currentRole = 'admin'; // 'admin' | 'cajero' | 'cliente'
+let currentRole = 'admin';
+
 // ==================== BODEGA ACTIVA ====================
 let activeStoreId = null;
 let activeStoreRole = null;
+
 function getStoreCollection(collectionName) {
   if (!activeStoreId) {
     throw new Error('No hay una bodega seleccionada.');
@@ -44,34 +46,42 @@ function getStoreCollection(collectionName) {
     .collection(collectionName);
 }
 
-let selectedPosPaymentMethod = 'Efectivo';
-let currentBoleta = null;
-let editingProductId = null;
-let editingCategoryId = null;
+// ==================== CARGAR DATOS DE UNA BODEGA ====================
+async function loadStoreData(bodegaId) {
+  const collections = {
+    products: 'productos',
+    categories: 'categorias',
+    sales: 'ventas',
+    movements: 'movimientos',
+    onlineOrders: 'pedidos'
+  };
 
-// Archivos de imagen en memoria (DataURL)
-let tempUploadedProductImage = '';
+  const loadedData = {};
 
-// Filtros
-let currentPosCategory = 'Todos';
-let currentInvCategory = 'Todos';
-let currentClientCategory = 'Todos';
-let movementFilter = 'all';
+  for (const [key, collectionName] of Object.entries(collections)) {
+    const snapshot = await db
+      .collection('bodegas')
+      .doc(bodegaId)
+      .collection(collectionName)
+      .get();
 
-// Elemento auxiliar
-const $ = (id) => document.getElementById(id);
-const nowFormatted = () => {
-  const d = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-};
+    loadedData[key] = snapshot.docs
+      .filter(doc => !doc.data().marcador)
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+  }
 
-function formatFileSize(bytes) {
-  if (!bytes) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+  products = loadedData.products;
+  categories = loadedData.categories;
+  sales = loadedData.sales;
+  movements = loadedData.movements;
+  onlineOrders = loadedData.onlineOrders;
+
+  activeStoreId = bodegaId;
+
+  console.log('Datos de bodega cargados:', bodegaId);
 }
 
 // ==================== INICIALIZACIÓN ====================
