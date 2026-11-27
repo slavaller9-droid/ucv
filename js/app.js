@@ -31,6 +31,19 @@ let tempMethodQrImages = { yape: '', plin: '', transferencia: '' };
 // Usuario y Sesión Actual
 let currentUser = null;
 let currentRole = 'admin'; // 'admin' | 'cajero' | 'cliente'
+// ==================== BODEGA ACTIVA ====================
+let activeStoreId = null;
+let activeStoreRole = null;
+function getStoreCollection(collectionName) {
+  if (!activeStoreId) {
+    throw new Error('No hay una bodega seleccionada.');
+  }
+
+  return db.collection('bodegas')
+    .doc(activeStoreId)
+    .collection(collectionName);
+}
+
 let selectedPosPaymentMethod = 'Efectivo';
 let currentBoleta = null;
 let editingProductId = null;
