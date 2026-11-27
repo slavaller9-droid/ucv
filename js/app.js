@@ -409,23 +409,12 @@ $('loginPage')?.classList.remove('hidden');
 if (accountSetup) accountSetup.classList.remove('hidden');
 if (googleBtn) googleBtn.classList.add('hidden');
 
-    
-
-
 if (createStoreBtn) {
   createStoreBtn.textContent = misBodegas.length > 0
     ? '🏪 Crear otra bodega'
     : '🏪 Crear mi bodega';
 }
-      
-      // No asignar roles automáticamente
-      $('app')?.classList.add('hidden');
-      $('clientStoreApp')?.classList.add('hidden');
-      $('loginPage')?.classList.remove('hidden');
-
-      if (accountSetup) accountSetup.classList.remove('hidden');
-      if (googleBtn) googleBtn.classList.add('hidden');
-
+  
      } catch (error) {
   console.error('Error al iniciar sesión o cargar bodegas:', error);
 
