@@ -8,14 +8,14 @@
  */
 
 // ==================== ESTADO GLOBAL ====================
-let products = Storage.getProducts();
-let categories = Storage.getCategories();
-let sales = Storage.getSales();
-let movements = Storage.getMovements();
-let storeConfig = Storage.getConfig();
-let users = Storage.getUsers();
-let onlineOrders = Storage.getOnlineOrders();
-let paymentMethods = Storage.getPaymentMethods();
+let products = [];
+let categories = [];
+let sales = [];
+let movements = [];
+let storeConfig = {};
+let users = [];
+let onlineOrders = [];
+let paymentMethods = [];
 
 // Carritos y seguimiento
 let posCart = [];
