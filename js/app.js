@@ -104,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAllViews();
 });
 
+// Elemento auxiliar
+const $ = (id) => document.getElementById(id);
+
 function initDateDisplay() {
   const now = new Date();
   const str = now.toLocaleDateString('es-PE', {
