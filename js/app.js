@@ -84,6 +84,21 @@ async function loadStoreData(bodegaId) {
   console.log('Datos de bodega cargados:', bodegaId);
 }
 
+// ==================== VARIABLES DE MÓDULOS ====================
+let selectedPosPaymentMethod = 'Efectivo';
+let currentBoleta = null;
+let editingProductId = null;
+let editingCategoryId = null;
+
+// Archivos de imagen en memoria
+let tempUploadedProductImage = '';
+
+// Filtros
+let currentPosCategory = 'Todos';
+let currentInvCategory = 'Todos';
+let currentClientCategory = 'Todos';
+let movementFilter = 'all';
+
 // ==================== INICIALIZACIÓN ====================
 document.addEventListener('DOMContentLoaded', () => {
   initDateDisplay();
