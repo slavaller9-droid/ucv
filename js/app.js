@@ -414,13 +414,7 @@ $('loginPage')?.classList.remove('hidden');
 if (accountSetup) accountSetup.classList.remove('hidden');
 if (googleBtn) googleBtn.classList.add('hidden');
 
-    console.error('Error al cargar la bodega:', error);
-
-    boton.disabled = false;
-    boton.textContent = 'REINTENTAR CONEXIÓN';
-    alert('No se pudieron cargar los datos. Revisa la consola.');
-  }
-});
+    
 
 
 if (createStoreBtn) {
