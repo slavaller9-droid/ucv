@@ -401,11 +401,6 @@ if (myStoresList) {
   }
 }
 
-if (createStoreBtn) {
-  createStoreBtn.textContent = misBodegas.length > 0
-    ? '🏪 Crear otra bodega'
-    : '🏪 Crear mi bodega';
-}
 
 $('app')?.classList.add('hidden');
 $('clientStoreApp')?.classList.add('hidden');
