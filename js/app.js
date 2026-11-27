@@ -351,28 +351,52 @@ if (myStoresList) {
         (bodega.rol === 'admin' ? 'Administradora' : 'Cajera');
       rol.style.cssText = 'font-size:16px;color:#475569;';
 
-      const boton = document.createElement('button');
-      boton.type = 'button';
-      boton.textContent = 'ACCESO EN PREPARACIÓN';
-      boton.disabled = true;
-      boton.style.cssText = `
-        width:100%;
-        padding:15px;
-        margin-top:12px;
-        border:0;
-        border-radius:10px;
-        background:#cbd5e1;
-        color:#334155;
-        font-size:15px;
-        font-weight:bold;
-        cursor:not-allowed;
-      `;
 
-      card.append(nombre, direccion, rol, boton);
-      myStoresList.appendChild(card);
-    });
+const boton = document.createElement('button');
+boton.type = 'button';
+boton.textContent = 'PROBAR CONEXIÓN';
+boton.style.cssText = `
+  width:100%;
+  padding:15px;
+  margin-top:12px;
+  border:0;
+  border-radius:10px;
+  background:#f9a8d4;
+  color:#831843;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+`;
+
+boton.addEventListener('click', async () => {
+  boton.disabled = true;
+  boton.textContent = 'CARGANDO...';
+
+  try {
+    await loadStoreData(bodega.id);
+
+    activeStoreRole = bodega.rol;
+
+    console.log('Conexión con la bodega correcta');
+    console.log('Productos:', products.length);
+    console.log('Categorías:', categories.length);
+    console.log('Ventas:', sales.length);
+    console.log('Movimientos:', movements.length);
+    console.log('Pedidos:', onlineOrders.length);
+
+    boton.textContent = 'CONEXIÓN CORRECTA ✓';
+    boton.style.background = '#bbf7d0';
+    boton.style.color = '#166534';
+
+  } catch (error) {
+    console.error('Error al cargar la bodega:', error);
+
+    boton.disabled = false;
+    boton.textContent = 'REINTENTAR CONEXIÓN';
+    alert('No se pudieron cargar los datos. Revisa la consola.');
   }
-}
+});
+
 
 if (createStoreBtn) {
   createStoreBtn.textContent = misBodegas.length > 0
