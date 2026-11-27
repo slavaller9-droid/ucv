@@ -986,12 +986,66 @@ function saveProduct() {
     showToast(`Producto "${name}" creado exitosamente.`);
   }
 
-  Storage.saveProducts(products);
-  Storage.saveMovements(movements);
-  closeAllModals();
-  editingProductId = null;
-  tempUploadedProductImage = '';
-  renderAllViews();
+  
+async function saveProduct() {
+  const name = $('pName').value.trim();
+  const sku = $('pSku').value.trim() || `PR-${Math.floor(100 + Math.random() * 900)}`;
+  const category = $('pCategory').value;
+  const emoji = $('pEmoji').value;
+  const price = parseFloat($('pPrice').value) || 0;
+  const stock = parseInt($('pStock').value) || 0;
+  const min = parseInt($('pMin').value) || 5;
+  const desc = $('pDesc').value.trim();
+
+  if (!activeStoreId || activeStoreRole !== 'admin') {
+    alert('No tienes permisos de administrador en una bodega activa.');
+    return;
+  }
+
+  if (editingProductId) {
+    alert('La edición de productos se habilitará en la siguiente etapa.');
+    return;
+  }
+
+  if (!name || price < 0 || stock < 0) {
+    alert('Ingresa valores válidos para el producto.');
+    return;
+  }
+
+  try {
+    const newProd = {
+      id: Date.now(),
+      sku,
+      name,
+      category,
+      price,
+      stock,
+      min,
+      emoji,
+      image: tempUploadedProductImage || '',
+      description: desc
+    };
+
+    const productRef = getStoreCollection('productos')
+      .doc(String(newProd.id));
+
+    await productRef.set(newProd);
+
+    products.push(newProd);
+
+    showToast(`Producto "${name}" guardado en Firebase.`);
+
+    closeAllModals();
+    editingProductId = null;
+    tempUploadedProductImage = '';
+    renderAllViews();
+
+    console.log('Producto guardado correctamente:', newProd);
+
+  } catch (error) {
+    console.error('Error al guardar producto en Firebase:', error);
+    alert('No se pudo guardar el producto: ' + error.message);
+  }
 }
 
 window.deleteProduct = function (id) {
