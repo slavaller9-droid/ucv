@@ -925,68 +925,6 @@ window.openProductModal = function (productId = null) {
   modal?.classList.remove('hidden');
 };
 
-function saveProduct() {
-  const name = $('pName').value.trim();
-  const sku = $('pSku').value.trim() || `PR-${Math.floor(100 + Math.random() * 900)}`;
-  const category = $('pCategory').value;
-  const emoji = $('pEmoji').value;
-  const price = parseFloat($('pPrice').value) || 0;
-  const stock = parseInt($('pStock').value) || 0;
-  const min = parseInt($('pMin').value) || 5;
-  const desc = $('pDesc').value.trim();
-
-  if (!name || price < 0 || stock < 0) {
-    alert('Ingresa valores válidos para el producto.');
-    return;
-  }
-
-  if (editingProductId) {
-    const p = products.find((x) => x.id === editingProductId);
-    if (p) {
-      p.name = name;
-      p.sku = sku;
-      p.category = category;
-      p.emoji = emoji;
-      if (currentRole !== 'cajero') {
-        p.price = price;
-        p.stock = stock;
-      }
-      p.min = min;
-      p.description = desc;
-      if (tempUploadedProductImage) p.image = tempUploadedProductImage;
-    }
-    showToast(`Producto "${name}" actualizado.`);
-  } else {
-    const newProd = {
-      id: Date.now(),
-      sku,
-      name,
-      category,
-      price,
-      stock,
-      min,
-      emoji,
-      image: tempUploadedProductImage,
-      description: desc
-    };
-    products.push(newProd);
-
-    // Movimiento inicial de entrada
-    movements.push({
-      id: Date.now(),
-      type: 'in',
-      subType: 'entrada',
-      product: name,
-      qty: stock,
-      date: nowFormatted(),
-      user: currentUser ? currentUser.name : 'Don Pepe (Admin)',
-      note: 'Inventario inicial de producto nuevo'
-    });
-
-    showToast(`Producto "${name}" creado exitosamente.`);
-  }
-
-  
 async function saveProduct() {
   const name = $('pName').value.trim();
   const sku = $('pSku').value.trim() || `PR-${Math.floor(100 + Math.random() * 900)}`;
