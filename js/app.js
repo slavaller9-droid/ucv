@@ -437,9 +437,6 @@ if (createStoreBtn) {
       if (accountSetup) accountSetup.classList.remove('hidden');
       if (googleBtn) googleBtn.classList.add('hidden');
 
-    } catch (error) {
-      console.error('Error al guardar el perfil:', error);
-
       if (loginMsg) {
         loginMsg.textContent =
           'Tu sesión inició, pero no se pudo guardar tu perfil.';
