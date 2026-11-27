@@ -426,11 +426,15 @@ if (createStoreBtn) {
       if (accountSetup) accountSetup.classList.remove('hidden');
       if (googleBtn) googleBtn.classList.add('hidden');
 
-      if (loginMsg) {
-        loginMsg.textContent =
-          'Tu sesión inició, pero no se pudo guardar tu perfil.';
-      }
-    }
+     } catch (error) {
+  console.error('Error al iniciar sesión o cargar bodegas:', error);
+
+  if (loginMsg) {
+    loginMsg.textContent =
+      'Tu sesión inició, pero ocurrió un error al cargar tus datos: ' +
+      (error.message || error);
+  }
+}
   });
 }
 
