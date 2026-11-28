@@ -2603,6 +2603,7 @@ window.resendOrderWhatsApp = function (orderId) {
 
 // ==================== TRANSACCIÓN NÚCLEO: DESCUENTO DE STOCK Y BOLETA ====================
 
+
 async function executeSaleTransaction(saleData) {
   if (!activeStoreId || !['admin', 'cajero'].includes(activeStoreRole)) {
     alert('No tienes permisos para registrar ventas en esta bodega.');
@@ -2618,6 +2619,7 @@ async function executeSaleTransaction(saleData) {
 
   for (const item of saleData.items) {
     const qty = Number(item.quantity);
+
     if (!Number.isInteger(qty) || qty <= 0) {
       alert('La cantidad de un producto no es válida.');
       return false;
@@ -2648,48 +2650,55 @@ async function executeSaleTransaction(saleData) {
     items: saleData.items
   };
 
+  let movementRefs = [];
+
   try {
     await db.runTransaction(async (transaction) => {
       const productRefs = [];
       const productSnapshots = [];
 
+      // Primero se realizan todas las lecturas.
       for (const [productId] of quantities) {
-        const prod = products.find(p => String(p.id) === String(productId));
+        const prod = products.find(
+          p => String(p.id) === String(productId)
+        );
 
         if (!prod) {
           throw new Error(`Producto ${productId} no encontrado.`);
         }
 
-        const remainingStock = currentStock - qty;
+        const ref = getStoreCollection('productos')
+          .doc(String(prod.id));
 
-const remainingStock = currentStock - qty;
+        const snapshot = await transaction.get(ref);
 
-transaction.update(ref, {
-  stock: remainingStock
-});
+        if (!snapshot.exists) {
+          throw new Error(`El producto "${prod.name}" ya no existe.`);
+        }
 
-const productData = productRefs[movementIndex];
+        const publicRef = db.collection('productosPublicos')
+          .doc(`${activeStoreId}_${prod.id}`);
 
-if (productData.publicExists) {
-  transaction.update(productData.publicRef, {
-    disponible: remainingStock > 0
-  });
-}
+        const publicSnapshot = await transaction.get(publicRef);
 
-const productData = productRefs[movementIndex];
+        productRefs.push({
+          ref,
+          publicRef,
+          publicExists: publicSnapshot.exists,
+          prod,
+          productId
+        });
 
-if (productData.publicExists) {
-  transaction.update(productData.publicRef, {
-    disponible: remainingStock > 0
-  });
-}
+        productSnapshots.push(snapshot);
       }
 
       let orderRef = null;
       let orderSnapshot = null;
 
       if (saleData.orderId != null) {
-        orderRef = getStoreCollection('pedidos').doc(String(saleData.orderId));
+        orderRef = getStoreCollection('pedidos')
+          .doc(String(saleData.orderId));
+
         orderSnapshot = await transaction.get(orderRef);
 
         if (!orderSnapshot.exists) {
@@ -2701,10 +2710,19 @@ if (productData.publicExists) {
         }
       }
 
-      const movementRefs = [];
+      // Después de las lecturas, se realizan las escrituras.
+      movementRefs = [];
       let movementIndex = 0;
 
-      for (const { ref, prod, productId } of productRefs) {
+      for (const productData of productRefs) {
+        const {
+          ref,
+          publicRef,
+          publicExists,
+          prod,
+          productId
+        } = productData;
+
         const snapshot = productSnapshots[movementIndex];
         const currentStock = Number(snapshot.data().stock) || 0;
         const qty = quantities.get(productId);
@@ -2714,6 +2732,8 @@ if (productData.publicExists) {
             `Stock insuficiente de "${prod.name}". Disponible: ${currentStock}; solicitado: ${qty}.`
           );
         }
+
+        const remainingStock = currentStock - qty;
 
         const movement = {
           id: saleId + movementIndex,
@@ -2729,11 +2749,18 @@ if (productData.publicExists) {
         };
 
         transaction.update(ref, {
-          stock: currentStock - qty
+          stock: remainingStock
         });
 
+        if (publicExists) {
+          transaction.update(publicRef, {
+            disponible: remainingStock > 0
+          });
+        }
+
         transaction.set(
-          getStoreCollection('movimientos').doc(String(movement.id)),
+          getStoreCollection('movimientos')
+            .doc(String(movement.id)),
           movement
         );
 
@@ -2768,8 +2795,13 @@ if (productData.publicExists) {
     });
 
     for (const [productId, qty] of quantities) {
-      const prod = products.find(p => String(p.id) === String(productId));
-      if (prod) prod.stock = Number(prod.stock || 0) - qty;
+      const prod = products.find(
+        p => String(p.id) === String(productId)
+      );
+
+      if (prod) {
+        prod.stock = Number(prod.stock || 0) - qty;
+      }
     }
 
     movements.push(...movementRefs);
@@ -2786,7 +2818,9 @@ if (productData.publicExists) {
         order.verifiedAt = saleDate;
         order.verifiedBy = operator;
 
-        if (!order.verificationHistory) order.verificationHistory = [];
+        if (!order.verificationHistory) {
+          order.verificationHistory = [];
+        }
 
         order.verificationHistory.push({
           action: 'Pago Aprobado',
