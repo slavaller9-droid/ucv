@@ -1616,6 +1616,22 @@ window.addClientProductToCart = function (productId) {
   renderClientCartUI();
   showToast(`"${p.name}" agregado al carrito.`);
 };
+
+window.removeOnlineCartItem = function (productId) {
+  onlineCart = onlineCart.filter(
+    i => String(i.id) !== String(productId)
+  );
+
+  renderClientCartUI();
+  renderOnlineCartModalItems();
+
+  const totalAmount = onlineCart.reduce(
+    (sum, i) => sum + i.subtotal, 0
+  );
+
+  renderOnlinePaymentDetails(totalAmount);
+};
+
 window.updateOnlineCartQty = function (productId, delta) {
   const itemIndex = onlineCart.findIndex(
     i => String(i.id) === String(productId)
