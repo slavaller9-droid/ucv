@@ -1285,28 +1285,37 @@ window.calculateCashChange = function () {
   }
 };
 
-window.confirmPosSale = function () {
+
+window.confirmPosSale = async function () {
   if (!posCart.length) return;
 
-  const totalAmount = posCart.reduce((acc, i) => acc + i.subtotal, 0);
-  const custName = $('customerName')?.value.trim() || 'Cliente mostrador';
-  const custPhone = $('customerPhone')?.value.trim() || '';
+  const totalAmount = posCart.reduce(
+    (acc, i) => acc + i.subtotal,
+    0
+  );
+
+  const custName =
+    $('customerName')?.value.trim() || 'Cliente mostrador';
+
+  const custPhone =
+    $('customerPhone')?.value.trim() || '';
 
   let cashReceived = null;
   let change = null;
 
   if (selectedPosPaymentMethod === 'Efectivo') {
-    cashReceived = parseFloat($('cashReceived')?.value) || totalAmount;
+    cashReceived =
+      parseFloat($('cashReceived')?.value) || totalAmount;
+
     if (cashReceived < totalAmount) {
       alert('El monto en efectivo ingresado no cubre el total de la compra.');
       return;
     }
+
     change = cashReceived - totalAmount;
   }
 
-  closeAllModals();
-
-  executeSaleTransaction({
+  const completed = await executeSaleTransaction({
     channel: 'presencial',
     customerName: custName,
     customerPhone: custPhone,
@@ -1318,11 +1327,18 @@ window.confirmPosSale = function () {
     total: totalAmount
   });
 
+  if (!completed) return;
+
+  closeAllModals();
+
   posCart = [];
+
   if ($('customerName')) $('customerName').value = '';
   if ($('customerPhone')) $('customerPhone').value = '';
+
   renderPosCart();
 };
+
 
 // ==================== TIENDA ONLINE STANDALONE (CLIENTE) ====================
 function initClientStoreModule() {
