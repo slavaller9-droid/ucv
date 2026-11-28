@@ -2521,67 +2521,204 @@ window.resendOrderWhatsApp = function (orderId) {
 };
 
 // ==================== TRANSACCIÓN NÚCLEO: DESCUENTO DE STOCK Y BOLETA ====================
-function executeSaleTransaction(saleData) {
-  const saleCode = Storage.getNextSaleCode(sales);
-  const saleDate = nowFormatted();
-  const operator = currentUser ? currentUser.name : 'Don Pepe (Admin)';
 
-  // 1. Descuento automático de stock del inventario central compartido
-  saleData.items.forEach((cartItem, idx) => {
-    const prod = products.find((p) => p.id === cartItem.id);
-    if (prod) {
-      prod.stock = Math.max(0, prod.stock - cartItem.quantity);
+async function executeSaleTransaction(saleData) {
+  if (!activeStoreId || !['admin', 'cajero'].includes(activeStoreRole)) {
+    alert('No tienes permisos para registrar ventas en esta bodega.');
+    return false;
+  }
 
-      movements.push({
-        id: Date.now() + idx,
-        type: 'out',
-        subType: saleData.channel === 'online' ? 'venta_online' : 'venta_presencial',
-        product: prod.name,
-        qty: cartItem.quantity,
-        date: saleDate,
-        user: `${saleData.channel === 'online' ? 'Online' : 'Caja'} (${operator})`,
-        note: `${saleData.channel === 'online' ? 'Venta tienda online' : 'Venta presencial mostrador'} Boleta #${saleCode}`
-      });
+  if (!saleData.items?.length) {
+    alert('La venta no contiene productos.');
+    return false;
+  }
+
+  const quantities = new Map();
+
+  for (const item of saleData.items) {
+    const qty = Number(item.quantity);
+    if (!Number.isInteger(qty) || qty <= 0) {
+      alert('La cantidad de un producto no es válida.');
+      return false;
     }
-  });
 
-  // 2. Registro oficial de la venta
+    quantities.set(item.id, (quantities.get(item.id) || 0) + qty);
+  }
+
+  const saleDate = nowFormatted();
+  const operator = currentUser ? currentUser.name : 'Usuario';
+  const saleId = Date.now();
+  const saleCode = Storage.getNextSaleCode(sales);
+
   const newSale = {
-    id: Date.now(),
+    id: saleId,
     code: saleCode,
     channel: saleData.channel,
     date: saleDate,
     customerName: saleData.customerName,
-    customerPhone: saleData.customerPhone,
+    customerPhone: saleData.customerPhone || '',
     operatorName: operator,
     paymentMethod: saleData.paymentMethod,
     paymentStatus: 'Pagado',
-    cashReceived: saleData.cashReceived,
-    change: saleData.change,
+    cashReceived: saleData.cashReceived ?? null,
+    change: saleData.change ?? null,
     subtotal: saleData.subtotal,
     total: saleData.total,
     items: saleData.items
   };
 
-  sales.push(newSale);
+  try {
+    await db.runTransaction(async (transaction) => {
+      const productRefs = [];
+      const productSnapshots = [];
 
-  // 3. Persistir en localStorage
-  Storage.saveProducts(products);
-  Storage.saveMovements(movements);
-  Storage.saveSales(sales);
+      for (const [productId] of quantities) {
+        const prod = products.find(p => String(p.id) === String(productId));
 
-  // 4. Actualizar todas las pantallas
-  renderAllViews();
+        if (!prod) {
+          throw new Error(`Producto ${productId} no encontrado.`);
+        }
 
-  // 5. REQUISITO FUNDAMENTAL: Abrir WhatsApp con el comprobante completo preparado
-  if (saleData.customerPhone && saleData.customerPhone.trim() !== '') {
-    setTimeout(() => {
-      openWhatsAppForSale(newSale);
-    }, 450);
+        const ref = getStoreCollection('productos').doc(String(prod.id));
+        const snapshot = await transaction.get(ref);
+
+        if (!snapshot.exists) {
+          throw new Error(`El producto "${prod.name}" ya no existe.`);
+        }
+
+        productRefs.push({ ref, prod, productId });
+        productSnapshots.push(snapshot);
+      }
+
+      let orderRef = null;
+      let orderSnapshot = null;
+
+      if (saleData.orderId != null) {
+        orderRef = getStoreCollection('pedidos').doc(String(saleData.orderId));
+        orderSnapshot = await transaction.get(orderRef);
+
+        if (!orderSnapshot.exists) {
+          throw new Error('El pedido ya no existe.');
+        }
+
+        if (orderSnapshot.data().paymentStatus === 'Confirmado') {
+          throw new Error('Este pedido ya fue aprobado.');
+        }
+      }
+
+      const movementRefs = [];
+      let movementIndex = 0;
+
+      for (const { ref, prod, productId } of productRefs) {
+        const snapshot = productSnapshots[movementIndex];
+        const currentStock = Number(snapshot.data().stock) || 0;
+        const qty = quantities.get(productId);
+
+        if (currentStock < qty) {
+          throw new Error(
+            `Stock insuficiente de "${prod.name}". Disponible: ${currentStock}; solicitado: ${qty}.`
+          );
+        }
+
+        const movement = {
+          id: saleId + movementIndex,
+          type: 'out',
+          subType: saleData.channel === 'online'
+            ? 'venta_online'
+            : 'venta_presencial',
+          product: prod.name,
+          qty,
+          date: saleDate,
+          user: `${saleData.channel === 'online' ? 'Online' : 'Caja'} (${operator})`,
+          note: `${saleData.channel === 'online' ? 'Venta tienda online' : 'Venta presencial mostrador'} Boleta #${saleCode}`
+        };
+
+        transaction.update(ref, {
+          stock: currentStock - qty
+        });
+
+        transaction.set(
+          getStoreCollection('movimientos').doc(String(movement.id)),
+          movement
+        );
+
+        movementRefs.push(movement);
+        movementIndex++;
+      }
+
+      transaction.set(
+        getStoreCollection('ventas').doc(String(newSale.id)),
+        newSale
+      );
+
+      if (orderRef && orderSnapshot) {
+        const order = orderSnapshot.data();
+        const history = [...(order.verificationHistory || [])];
+
+        history.push({
+          action: 'Pago Aprobado',
+          timestamp: saleDate,
+          adminName: operator,
+          notes: 'Pago verificado y aprobado. Stock descontado del inventario.'
+        });
+
+        transaction.update(orderRef, {
+          paymentStatus: 'Confirmado',
+          orderStatus: 'Aceptado',
+          verifiedAt: saleDate,
+          verifiedBy: operator,
+          verificationHistory: history
+        });
+      }
+    });
+
+    for (const [productId, qty] of quantities) {
+      const prod = products.find(p => String(p.id) === String(productId));
+      if (prod) prod.stock = Number(prod.stock || 0) - qty;
+    }
+
+    movements.push(...movementRefs);
+    sales.push(newSale);
+
+    if (saleData.orderId != null) {
+      const order = onlineOrders.find(
+        o => String(o.id) === String(saleData.orderId)
+      );
+
+      if (order) {
+        order.paymentStatus = 'Confirmado';
+        order.orderStatus = 'Aceptado';
+        order.verifiedAt = saleDate;
+        order.verifiedBy = operator;
+
+        if (!order.verificationHistory) order.verificationHistory = [];
+
+        order.verificationHistory.push({
+          action: 'Pago Aprobado',
+          timestamp: saleDate,
+          adminName: operator,
+          notes: 'Pago verificado y aprobado. Stock descontado del inventario.'
+        });
+      }
+    }
+
+    renderAllViews();
+
+    if (saleData.customerPhone?.trim()) {
+      setTimeout(() => openWhatsAppForSale(newSale), 450);
+    }
+
+    viewBoleta(saleCode);
+    showToast(`Venta ${saleCode} guardada correctamente en Firebase.`);
+
+    console.log('Venta guardada en Firebase:', newSale);
+    return true;
+
+  } catch (error) {
+    console.error('Error en la transacción de venta:', error);
+    alert('No se pudo completar la venta: ' + error.message);
+    return false;
   }
-
-  // 6. Visualizar comprobante en pantalla
-  viewBoleta(saleCode);
 }
 
 // ==================== APERTURA DE WHATSAPP CON MENSAJE PREPARADO ====================
