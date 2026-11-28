@@ -1734,9 +1734,15 @@ window.clearSelectedVoucher = function () {
   $('voucherDropzoneContent')?.classList.remove('hidden');
 };
 
-window.processOnlineCheckout = function () {
+
+window.processOnlineCheckout = async function () {
   if (!onlineCart.length) {
     alert('Tu carrito está vacío.');
+    return;
+  }
+
+  if (!activeStoreId) {
+    alert('No hay una bodega seleccionada para registrar el pedido.');
     return;
   }
 
@@ -1750,40 +1756,36 @@ window.processOnlineCheckout = function () {
     return;
   }
 
-  // REQUISITO: Número de WhatsApp obligatorio antes de finalizar la compra
   if (!phone || phone.replace(/\D/g, '').length < 8) {
-    alert('Por favor ingresa un número de WhatsApp válido para poder coordinar tu pedido.');
+    alert('Por favor ingresa un número de WhatsApp válido.');
     $('onlineCustPhone')?.focus();
     return;
   }
 
   if (currentDeliveryMethod === 'delivery' && !address) {
-    alert('Por favor ingresa tu dirección exacta de entrega para el envío a domicilio.');
+    alert('Por favor ingresa tu dirección exacta de entrega.');
     $('onlineCustAddress')?.focus();
     return;
   }
 
-  // Validar stock disponible en el inventario central compartido
   for (const item of onlineCart) {
-    const prod = products.find((p) => p.id === item.id);
-    if (!prod || prod.stock < item.quantity) {
-      alert(`Lo sentimos, el stock disponible de "${item.name}" cambió a ${prod ? prod.stock : 0} unidades.`);
+    const prod = products.find(p => String(p.id) === String(item.id));
+
+    if (!prod || Number(prod.stock) < Number(item.quantity)) {
+      alert(`Stock insuficiente para "${item.name}".`);
       renderAllViews();
       return;
     }
   }
 
-  const totalAmount = onlineCart.reduce((sum, i) => sum + i.subtotal, 0);
+  const totalAmount = onlineCart.reduce((sum, item) => sum + item.subtotal, 0);
   const orderCode = Storage.getNextOrderCode(onlineOrders);
   const orderDate = nowFormatted();
 
   const fullAddress = currentDeliveryMethod === 'delivery'
     ? address
-    : `Recojo en bodega (${storeConfig.address || 'Av. Las Gardenias 452'})`;
+    : `Recojo en bodega (${storeConfig.address || 'Dirección de la bodega'})`;
 
-  // NUEVO PROCEDIMIENTO OBLIGATORIO:
-  // El cliente NO puede confirmar directamente que el pago fue realizado o aprobado.
-  // El pedido queda registrado con el estado de pago «Pendiente de verificación».
   const newOrder = {
     id: Date.now(),
     code: orderCode,
@@ -1793,7 +1795,6 @@ window.processOnlineCheckout = function () {
     deliveryAddress: fullAddress,
     date: orderDate,
     paymentMethod: onlineSelectedPaymentMethod,
-    // 3 Estados estrictamente independientes:
     paymentStatus: 'Pendiente de verificación',
     orderStatus: 'Pendiente',
     deliveryStatus: 'Pendiente',
@@ -1806,32 +1807,45 @@ window.processOnlineCheckout = function () {
         action: 'Creado',
         timestamp: orderDate,
         adminName: `Cliente (${name})`,
-        notes: activeVoucherFile ? 'Pedido registrado con comprobante adjuntado' : 'Pedido registrado, comprobante por adjuntar o enviar por WhatsApp'
+        notes: activeVoucherFile
+          ? 'Pedido registrado con comprobante adjuntado'
+          : 'Pedido registrado, comprobante por adjuntar o enviar por WhatsApp'
       }
     ]
   };
 
-  onlineOrders.push(newOrder);
-  Storage.saveOnlineOrders(onlineOrders);
+  try {
+    await getStoreCollection('pedidos')
+      .doc(String(newOrder.id))
+      .set(newOrder);
 
-  // Limpiar carrito
-  onlineCart = [];
-  activeVoucherFile = null;
-  const voucherInput = $('clientVoucherFile');
-  if (voucherInput) voucherInput.value = '';
-  $('voucherSelectedPreview')?.classList.add('hidden');
-  $('voucherDropzoneContent')?.classList.remove('hidden');
+    onlineOrders.push(newOrder);
+    onlineCart = [];
+    activeVoucherFile = null;
 
-  closeAllModals();
-  renderClientCartUI();
-  renderOnlineOrdersTable();
-  renderPaymentVerificationTable();
-  updateDashboardStats();
+    const voucherInput = $('clientVoucherFile');
+    if (voucherInput) voucherInput.value = '';
 
-  // Abrir pantalla de seguimiento para el cliente (SIN NINGÚN BOTÓN DE AUTO-APROBACIÓN)
-  openClientOrderTracking(newOrder.id);
-  showToast(`¡Pedido ${orderCode} registrado! Pendiente de verificación por el administrador.`);
+    $('voucherSelectedPreview')?.classList.add('hidden');
+    $('voucherDropzoneContent')?.classList.remove('hidden');
+
+    closeAllModals();
+    renderClientCartUI();
+    renderOnlineOrdersTable();
+    renderPaymentVerificationTable();
+    updateDashboardStats();
+
+    openClientOrderTracking(newOrder.id);
+    showToast(`¡Pedido ${orderCode} registrado en Firebase! Pendiente de verificación.`);
+
+    console.log('Pedido guardado en Firebase:', newOrder);
+
+  } catch (error) {
+    console.error('Error al guardar pedido:', error);
+    alert('No se pudo registrar el pedido: ' + error.message);
+  }
 };
+
 
 // ==================== SEGUIMIENTO DEL PEDIDO DEL CLIENTE ====================
 window.openClientOrderTracking = function (orderId) {
