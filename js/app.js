@@ -47,6 +47,7 @@ function getStoreCollection(collectionName) {
 }
 
 // ==================== CARGAR DATOS DE UNA BODEGA ====================
+
 async function loadStoreData(bodegaId) {
   const collections = {
     products: 'productos',
@@ -55,6 +56,46 @@ async function loadStoreData(bodegaId) {
     movements: 'movimientos',
     onlineOrders: 'pedidos'
   };
+
+  const loadedData = {};
+
+  for (const [key, collectionName] of Object.entries(collections)) {
+    const snapshot = await db
+      .collection('bodegas')
+      .doc(bodegaId)
+      .collection(collectionName)
+      .get();
+
+    loadedData[key] = snapshot.docs
+      .filter(doc => !doc.data().marcador)
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+  }
+
+  const publicSnapshot = await db.collection('productosPublicos')
+    .where('bodegaId', '==', bodegaId)
+    .get();
+
+  const publicProducts = publicSnapshot.docs.map(doc => ({
+    id: doc.data().productoId,
+    ...doc.data()
+  }));
+
+  products = loadedData.products;
+  categories = loadedData.categories;
+  sales = loadedData.sales;
+  movements = loadedData.movements;
+  onlineOrders = loadedData.onlineOrders;
+
+  window.publicProducts = publicProducts;
+  activeStoreId = bodegaId;
+
+  console.log('Datos de bodega cargados:', bodegaId);
+  console.log('Productos públicos:', publicProducts.length);
+}
+
 
   const loadedData = {};
 
