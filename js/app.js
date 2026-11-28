@@ -1804,6 +1804,7 @@ window.processOnlineCheckout = async function () {
 
   const newOrder = {
     id: Date.now(),
+    customerUid: auth.currentUser?.uid,
     code: orderCode,
     customerName: name,
     customerPhone: phone,
