@@ -1865,9 +1865,44 @@ window.processOnlineCheckout = async function () {
 
 
 // ==================== SEGUIMIENTO DEL PEDIDO DEL CLIENTE ====================
-window.openClientOrderTracking = function (orderId) {
-  const order = onlineOrders.find((o) => o.id === orderId);
-  if (!order) return;
+
+window.openClientOrderTracking = async function (orderId) {
+  const uid = auth.currentUser?.uid;
+
+  if (!uid || !activeStoreId) {
+    alert('Inicia sesión para consultar tu pedido.');
+    return;
+  }
+
+  let order = onlineOrders.find(
+    o => String(o.id) === String(orderId)
+  );
+
+  try {
+    if (!order) {
+      const snapshot = await getStoreCollection('pedidos')
+        .doc(String(orderId))
+        .get();
+
+      if (!snapshot.exists) {
+        alert('No se encontró el pedido.');
+        return;
+      }
+
+      order = snapshot.data();
+    }
+
+    if (order.customerUid !== uid) {
+      alert('No tienes permiso para consultar este pedido.');
+      return;
+    }
+
+  } catch (error) {
+    console.error('Error al consultar pedido:', error);
+    alert('No se pudo cargar el seguimiento del pedido.');
+    return;
+  }
+
 
   activeTrackingOrderId = order.id;
 
