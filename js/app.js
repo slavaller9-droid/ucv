@@ -1477,8 +1477,7 @@ window.setClientCategory = function (cat) {
 
 
 window.addClientProductToCart = function (productId) {
-  const publicProducts = window.publicProducts || [];
-  const p = publicProducts.find(
+  const p = (window.publicProducts || []).find(
     x => String(x.id) === String(productId)
   );
 
@@ -1503,11 +1502,6 @@ window.addClientProductToCart = function (productId) {
       image: p.image || '',
       quantity: 1,
       subtotal: p.price
-    });
-  }
-
-  renderClientCartUI();
-  showToast(`"${p.name}" agregado al carrito.`);
     });
   }
 
