@@ -2262,46 +2262,35 @@ window.openVoucherModal = function (orderId) {
   modal.classList.remove('hidden');
 };
 
-window.adminApprovePayment = function (orderId) {
-  const order = onlineOrders.find((o) => o.id === orderId);
-  if (!order) return;
+
+window.adminApprovePayment = async function (orderId) {
+  const order = onlineOrders.find(
+    o => String(o.id) === String(orderId)
+  );
+
+  if (!order) {
+    alert('No se encontró el pedido.');
+    return;
+  }
+
+  if (!activeStoreId || activeStoreRole !== 'admin') {
+    alert('Solo el administrador de esta bodega puede aprobar pagos.');
+    return;
+  }
 
   if (order.paymentStatus === 'Confirmado') {
     showToast(`El pedido ${order.code} ya fue aprobado.`);
     return;
   }
 
-  // Validar stock antes de descontar del inventario central compartido
-  for (const item of order.items) {
-    const prod = products.find((p) => p.id === item.id);
-    if (!prod || prod.stock < item.quantity) {
-      alert(`No hay stock suficiente para aprobar el pago. Producto "${item.name}" tiene ${prod ? prod.stock : 0} un. y el pedido requiere ${item.quantity} un.`);
-      return;
-    }
+  if (order.paymentStatus === 'Rechazado') {
+    alert('Este pedido fue rechazado y no puede aprobarse directamente.');
+    return;
   }
 
-  const adminName = currentUser ? currentUser.name : 'Don Pepe (Admin)';
-  const approvedDate = nowFormatted();
-
-  // 1. Actualizar estados del pedido
-  order.paymentStatus = 'Confirmado';
-  order.orderStatus = 'Aceptado';
-  order.verifiedAt = approvedDate;
-  order.verifiedBy = adminName;
-
-  if (!order.verificationHistory) order.verificationHistory = [];
-  order.verificationHistory.push({
-    action: 'Pago Aprobado',
-    timestamp: approvedDate,
-    adminName: adminName,
-    notes: 'Pago verificado en cuenta y aprobado por el administrador. Stock descontado del inventario central.'
-  });
-
-  Storage.saveOnlineOrders(onlineOrders);
-
-  // 2. Ejecutar transacción central: descontar inventario, registrar salida y venta oficial, y preparar WhatsApp
-  executeSaleTransaction({
+  const completed = await executeSaleTransaction({
     channel: 'online',
+    orderId: order.id,
     customerName: order.customerName,
     customerPhone: order.customerPhone,
     paymentMethod: order.paymentMethod,
@@ -2312,11 +2301,15 @@ window.adminApprovePayment = function (orderId) {
     total: order.total
   });
 
+  if (!completed) return;
+
   renderPaymentVerificationTable();
   renderOnlineOrdersTable();
   updateDashboardStats();
-  showToast(`¡Pago del pedido ${order.code} APROBADO con éxito! Boleta generada.`);
+
+  showToast(`¡Pedido ${order.code} aprobado y registrado en Firebase!`);
 };
+
 
 window.openRejectPaymentModal = function (orderId) {
   const order = onlineOrders.find((o) => o.id === orderId);
