@@ -937,7 +937,7 @@ async function saveProduct() {
     return;
   }
 
-   try {
+  try {
     const newProd = {
       id: Date.now(),
       sku,
@@ -957,29 +957,25 @@ async function saveProduct() {
     const publicProductRef = db.collection('productosPublicos')
       .doc(`${activeStoreId}_${newProd.id}`);
 
-    const publicProduct = {
-      bodegaId: activeStoreId,
-      productoId: String(newProd.id),
-      name: newProd.name,
-      category: newProd.category,
-      price: newProd.price,
-      emoji: newProd.emoji,
-      image: newProd.image,
-      description: newProd.description,
-      disponible: newProd.stock > 0
-    };
-
     const batch = db.batch();
 
     batch.set(productRef, newProd);
-    batch.set(publicProductRef, publicProduct);
+    batch.set(publicProductRef, {
+      bodegaId: activeStoreId,
+      productoId: String(newProd.id),
+      name,
+      category,
+      price,
+      emoji,
+      image: newProd.image,
+      description: desc,
+      disponible: stock > 0
+    });
 
     await batch.commit();
 
     products.push(newProd);
-
     showToast(`Producto "${name}" guardado en Firebase.`);
-
     closeAllModals();
     editingProductId = null;
     tempUploadedProductImage = '';
@@ -991,28 +987,7 @@ async function saveProduct() {
     console.error('Error al guardar producto en Firebase:', error);
     alert('No se pudo guardar el producto: ' + error.message);
   }
-    const productRef = getStoreCollection('productos')
-      .doc(String(newProd.id));
-
-    await productRef.set(newProd);
-
-    products.push(newProd);
-
-    showToast(`Producto "${name}" guardado en Firebase.`);
-
-    closeAllModals();
-    editingProductId = null;
-    tempUploadedProductImage = '';
-    renderAllViews();
-
-    console.log('Producto guardado correctamente:', newProd);
-
-  } catch (error) {
-    console.error('Error al guardar producto en Firebase:', error);
-    alert('No se pudo guardar el producto: ' + error.message);
-  }
 }
-
 window.deleteProduct = function () {
   alert('La eliminación de productos estará disponible cuando terminemos la migración a Firebase.');
 };
