@@ -2662,9 +2662,19 @@ async function executeSaleTransaction(saleData) {
 
         const remainingStock = currentStock - qty;
 
+const remainingStock = currentStock - qty;
+
 transaction.update(ref, {
   stock: remainingStock
 });
+
+const productData = productRefs[movementIndex];
+
+if (productData.publicExists) {
+  transaction.update(productData.publicRef, {
+    disponible: remainingStock > 0
+  });
+}
 
 const productData = productRefs[movementIndex];
 
