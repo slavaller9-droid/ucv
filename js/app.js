@@ -1616,11 +1616,39 @@ window.addClientProductToCart = function (productId) {
   renderClientCartUI();
   showToast(`"${p.name}" agregado al carrito.`);
 };
-window.removeOnlineCartItem = function (productId) {
-  onlineCart = onlineCart.filter((i) => i.id !== productId);
+window.updateOnlineCartQty = function (productId, delta) {
+  const itemIndex = onlineCart.findIndex(
+    i => String(i.id) === String(productId)
+  );
+
+  if (itemIndex === -1) return;
+
+  const item = onlineCart[itemIndex];
+  const p = (window.publicProducts || []).find(
+    x => String(x.id) === String(productId)
+  );
+
+  if (delta > 0 && (!p || p.disponible !== true)) {
+    showToast('Este producto ya no está disponible.');
+    return;
+  }
+
+  const newQty = item.quantity + delta;
+
+  if (newQty <= 0) {
+    onlineCart.splice(itemIndex, 1);
+  } else {
+    item.quantity = newQty;
+    item.subtotal = newQty * item.price;
+  }
+
   renderClientCartUI();
   renderOnlineCartModalItems();
-  const totalAmount = onlineCart.reduce((sum, i) => sum + i.subtotal, 0);
+
+  const totalAmount = onlineCart.reduce(
+    (sum, i) => sum + i.subtotal, 0
+  );
+
   renderOnlinePaymentDetails(totalAmount);
 };
 
