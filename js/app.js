@@ -1408,17 +1408,66 @@ function initClientStoreModule() {
   $('clientSearchInput')?.addEventListener('input', renderClientProducts);
 }
 
+
 function renderClientProducts() {
   const grid = $('clientProductGrid');
   if (!grid) return;
 
   const query = ($('clientSearchInput')?.value || '').toLowerCase().trim();
+  const publicProducts = window.publicProducts || [];
 
-  const filtered = products.filter((p) => {
-    const matchesSearch = (p.name + ' ' + (p.sku || '') + ' ' + p.category + ' ' + (p.description || '')).toLowerCase().includes(query);
-    const matchesCat = currentClientCategory === 'Todos' || p.category === currentClientCategory;
+  const filtered = publicProducts.filter(p => {
+    const text = [
+      p.name, p.category, p.description
+    ].join(' ').toLowerCase();
+
+    const matchesSearch = text.includes(query);
+    const matchesCat = currentClientCategory === 'Todos'
+      || p.category === currentClientCategory;
+
     return matchesSearch && matchesCat;
   });
+
+  grid.innerHTML = '';
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted)">No encontramos productos disponibles en la tienda.</div>';
+    return;
+  }
+
+  filtered.forEach(p => {
+    const isSoldOut = p.disponible !== true;
+
+    const imgDisplay = p.image
+      ? `<img src="${p.image}" class="online-card-img" alt="${p.name}" />`
+      : `<div class="online-card-icon">${p.emoji || '📦'}</div>`;
+
+    const card = document.createElement('div');
+    card.className = `online-card ${isSoldOut ? 'sold-out' : ''}`;
+
+    card.innerHTML = `
+      <div class="online-card-top">
+        <span class="badge ${isSoldOut ? 'b-out' : 'b-ok'}">
+          ${isSoldOut ? 'AGOTADO' : 'DISPONIBLE'}
+        </span>
+        <span style="font-size:11.5px;color:var(--muted);">${p.category || ''}</span>
+      </div>
+      ${imgDisplay}
+      <h4>${p.name}</h4>
+      <p class="online-card-desc">${p.description || 'Disponible para pedido en la bodega.'}</p>
+      <div class="online-card-bottom">
+        <div class="online-card-price">${formatMoney(p.price)}</div>
+        ${
+          isSoldOut
+            ? `<button class="btn btn-outline btn-sm" disabled>AGOTADO</button>`
+            : `<button class="btn-add-online" onclick="addClientProductToCart('${p.id}')">＋ Agregar</button>`
+        }
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
 
   grid.innerHTML = '';
 
@@ -1467,12 +1516,41 @@ window.setClientCategory = function (cat) {
   renderClientProducts();
 };
 
+
 window.addClientProductToCart = function (productId) {
-  const p = products.find((x) => x.id === productId);
-  if (!p || p.stock <= 0) {
-    showToast(`Lo sentimos, "${p?.name || 'Producto'}" está AGOTADO.`);
+  const publicProducts = window.publicProducts || [];
+  const p = publicProducts.find(
+    x => String(x.id) === String(productId)
+  );
+
+  if (!p || p.disponible !== true) {
+    showToast('Lo sentimos, este producto está agotado.');
     return;
   }
+
+  const existing = onlineCart.find(
+    i => String(i.id) === String(productId)
+  );
+
+  if (existing) {
+    existing.quantity++;
+    existing.subtotal = existing.quantity * existing.price;
+  } else {
+    onlineCart.push({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      emoji: p.emoji || '📦',
+      image: p.image || '',
+      quantity: 1,
+      subtotal: p.price
+    });
+  }
+
+  renderClientCartUI();
+  showToast(`"${p.name}" agregado al carrito.`);
+};
+
 
   const existing = onlineCart.find((i) => i.id === productId);
   if (existing) {
@@ -1572,24 +1650,43 @@ function renderOnlineCartModalItems() {
   });
 }
 
+
 window.updateOnlineCartQty = function (productId, delta) {
-  const itemIndex = onlineCart.findIndex((i) => i.id === productId);
+  const itemIndex = onlineCart.findIndex(
+    i => String(i.id) === String(productId)
+  );
+
   if (itemIndex === -1) return;
 
   const item = onlineCart[itemIndex];
-  const p = products.find((x) => x.id === productId);
+  const p = (window.publicProducts || []).find(
+    x => String(x.id) === String(productId)
+  );
+
+  if (delta > 0 && (!p || p.disponible !== true)) {
+    showToast('Este producto ya no está disponible.');
+    return;
+  }
+
   const newQty = item.quantity + delta;
 
   if (newQty <= 0) {
     onlineCart.splice(itemIndex, 1);
   } else {
-    if (p && newQty > p.stock) {
-      showToast(`Stock máximo alcanzado (${p.stock} un.).`);
-      return;
-    }
     item.quantity = newQty;
     item.subtotal = item.quantity * item.price;
   }
+
+  renderClientCartUI();
+  renderOnlineCartModalItems();
+
+  const totalAmount = onlineCart.reduce(
+    (sum, i) => sum + i.subtotal, 0
+  );
+
+  renderOnlinePaymentDetails(totalAmount);
+};
+
 
   renderClientCartUI();
   renderOnlineCartModalItems();
