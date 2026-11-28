@@ -1584,33 +1584,38 @@ function renderOnlineCartModalItems() {
 }
 
 
-window.updateOnlineCartQty = function (productId, delta) {
-  const itemIndex = onlineCart.findIndex(
-    i => String(i.id) === String(productId)
-  );
-
-  if (itemIndex === -1) return;
-
-  const item = onlineCart[itemIndex];
+window.addClientProductToCart = function (productId) {
   const p = (window.publicProducts || []).find(
     x => String(x.id) === String(productId)
   );
 
-  if (delta > 0 && (!p || p.disponible !== true)) {
-    showToast('Este producto ya no está disponible.');
+  if (!p || p.disponible !== true) {
+    showToast('Lo sentimos, este producto está agotado.');
     return;
   }
 
-  const newQty = item.quantity + delta;
+  const existing = onlineCart.find(
+    i => String(i.id) === String(productId)
+  );
 
-  if (newQty <= 0) {
-    onlineCart.splice(itemIndex, 1);
+  if (existing) {
+    existing.quantity++;
+    existing.subtotal = existing.quantity * existing.price;
   } else {
-    item.quantity = newQty;
-    item.subtotal = item.quantity * item.price;
+    onlineCart.push({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      emoji: p.emoji || '📦',
+      image: p.image || '',
+      quantity: 1,
+      subtotal: p.price
+    });
   }
-};
 
+  renderClientCartUI();
+  showToast(`"${p.name}" agregado al carrito.`);
+};
 window.removeOnlineCartItem = function (productId) {
   onlineCart = onlineCart.filter((i) => i.id !== productId);
   renderClientCartUI();
