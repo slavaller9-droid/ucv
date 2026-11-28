@@ -1001,38 +1001,73 @@ window.openStockEntryModal = function () {
   $('modalStockEntry')?.classList.remove('hidden');
 };
 
-function saveStockEntry() {
+
+async function saveStockEntry() {
   const prodId = parseInt($('stockEntryProduct').value);
   const qty = parseInt($('stockEntryQty').value) || 0;
   const note = $('stockEntryNote').value.trim() || 'Entrada directa a bodega';
 
-  if (!prodId || qty <= 0) {
-    alert('Ingresa una cantidad válida a ingresar.');
+  if (!activeStoreId || !['admin', 'cajero'].includes(activeStoreRole)) {
+    alert('No tienes permisos para registrar entradas en esta bodega.');
     return;
   }
 
-  const prod = products.find((p) => p.id === prodId);
-  if (!prod) return;
+  if (!Number.isInteger(prodId) || qty <= 0) {
+    alert('Ingresa una cantidad válida.');
+    return;
+  }
 
-  prod.stock += qty;
+  const prod = products.find(p => Number(p.id) === prodId);
 
-  movements.push({
+  if (!prod) {
+    alert('No se encontró el producto seleccionado.');
+    return;
+  }
+
+  const newStock = Number(prod.stock || 0) + qty;
+
+  const movement = {
     id: Date.now(),
     type: 'in',
     subType: 'entrada',
     product: prod.name,
     qty,
     date: nowFormatted(),
-    user: currentUser ? currentUser.name : 'Don Pepe (Admin)',
+    user: currentUser ? currentUser.name : 'Usuario',
     note
-  });
+  };
 
-  Storage.saveProducts(products);
-  Storage.saveMovements(movements);
+  try {
+    const batch = db.batch();
 
-  closeAllModals();
-  renderAllViews();
-  showToast(`Se agregaron +${qty} unidades a "${prod.name}".`);
+    const productRef = getStoreCollection('productos')
+      .doc(String(prod.id));
+
+    const movementRef = getStoreCollection('movimientos')
+      .doc(String(movement.id));
+
+    batch.update(productRef, {
+      stock: newStock
+    });
+
+    batch.set(movementRef, movement);
+
+    await batch.commit();
+
+    prod.stock = newStock;
+    movements.push(movement);
+
+    closeAllModals();
+    renderAllViews();
+
+    showToast(`Se agregaron +${qty} unidades a "${prod.name}".`);
+
+    console.log('Entrada guardada en Firebase:', movement);
+
+  } catch (error) {
+    console.error('Error al registrar entrada:', error);
+    alert('No se pudo registrar la entrada: ' + error.message);
+  }
 }
 
 // ==================== VENTAS PRESENCIALES (POS) ====================
