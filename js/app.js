@@ -46,49 +46,6 @@ function getStoreCollection(collectionName) {
     .collection(collectionName);
 }
 
-// ==================== CARGAR DATOS DE UNA BODEGA ====================
-
-async function loadStoreData(bodegaId) {
-  const collections = {
-    products: 'productos',
-    categories: 'categorias',
-    sales: 'ventas',
-    movements: 'movimientos',
-    onlineOrders: 'pedidos'
-  };
-
-  console.log('Productos públicos:', publicProducts.length);
-}
-
-
-  const loadedData = {};
-
-  for (const [key, collectionName] of Object.entries(collections)) {
-    const snapshot = await db
-      .collection('bodegas')
-      .doc(bodegaId)
-      .collection(collectionName)
-      .get();
-
-    loadedData[key] = snapshot.docs
-      .filter(doc => !doc.data().marcador)
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-  }
-
-  products = loadedData.products;
-  categories = loadedData.categories;
-  sales = loadedData.sales;
-  movements = loadedData.movements;
-  onlineOrders = loadedData.onlineOrders;
-
-  activeStoreId = bodegaId;
-
-  console.log('Datos de bodega cargados:', bodegaId);
-}
-
 // ==================== VARIABLES DE MÓDULOS ====================
 let selectedPosPaymentMethod = 'Efectivo';
 let currentBoleta = null;
