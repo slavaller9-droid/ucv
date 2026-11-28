@@ -1042,19 +1042,26 @@ async function saveStockEntry() {
   try {
     const batch = db.batch();
 
-    const productRef = getStoreCollection('productos')
-      .doc(String(prod.id));
+const productRef = getStoreCollection('productos')
+  .doc(String(prod.id));
 
-    const movementRef = getStoreCollection('movimientos')
-      .doc(String(movement.id));
+const movementRef = getStoreCollection('movimientos')
+  .doc(String(movement.id));
 
-    batch.update(productRef, {
-      stock: newStock
-    });
+const publicProductRef = db.collection('productosPublicos')
+  .doc(`${activeStoreId}_${prod.id}`);
 
-    batch.set(movementRef, movement);
+batch.update(productRef, {
+  stock: newStock
+});
 
-    await batch.commit();
+batch.update(publicProductRef, {
+  disponible: newStock > 0
+});
+
+batch.set(movementRef, movement);
+
+await batch.commit();
 
     prod.stock = newStock;
     movements.push(movement);
