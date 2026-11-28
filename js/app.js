@@ -2660,15 +2660,19 @@ async function executeSaleTransaction(saleData) {
           throw new Error(`Producto ${productId} no encontrado.`);
         }
 
-        const ref = getStoreCollection('productos').doc(String(prod.id));
-        const snapshot = await transaction.get(ref);
+        const remainingStock = currentStock - qty;
 
-        if (!snapshot.exists) {
-          throw new Error(`El producto "${prod.name}" ya no existe.`);
-        }
+transaction.update(ref, {
+  stock: remainingStock
+});
 
-        productRefs.push({ ref, prod, productId });
-        productSnapshots.push(snapshot);
+const productData = productRefs[movementIndex];
+
+if (productData.publicExists) {
+  transaction.update(productData.publicRef, {
+    disponible: remainingStock > 0
+  });
+}
       }
 
       let orderRef = null;
