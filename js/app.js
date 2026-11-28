@@ -389,6 +389,19 @@ if (myStoresList) {
           await loadStoreData(bodega.id);
           activeStoreRole = bodega.rol;
 
+          // Entrar al panel de la bodega
+$('loginPage')?.classList.add('hidden');
+$('app')?.classList.remove('hidden');
+$('clientStoreApp')?.classList.add('hidden');
+
+if (accountSetup) {
+  accountSetup.classList.add('hidden');
+}
+
+renderAllViews();
+switchView('inicio');
+
+showToast('¡Bienvenida a tu bodega!');
           console.log('Conexión con la bodega correcta');
           console.log('Productos:', products.length);
           console.log('Categorías:', categories.length);
