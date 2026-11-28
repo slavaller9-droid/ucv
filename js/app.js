@@ -1469,47 +1469,6 @@ function renderClientProducts() {
   });
 }
 
-  grid.innerHTML = '';
-
-  if (!filtered.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted)">No encontramos productos que coincidan con tu búsqueda en la tienda.</div>';
-    return;
-  }
-
-  filtered.forEach((p) => {
-    const isSoldOut = p.stock === 0;
-    const isLow = p.stock > 0 && p.stock <= p.min;
-    const status = getProductStatus(p);
-
-    const imgDisplay = p.image
-      ? `<img src="${p.image}" class="online-card-img" alt="${p.name}" />`
-      : `<div class="online-card-icon">${p.emoji}</div>`;
-
-    const card = document.createElement('div');
-    card.className = `online-card ${isSoldOut ? 'sold-out' : ''}`;
-
-    card.innerHTML = `
-      <div class="online-card-top">
-        <span class="badge ${status.badge}">${isSoldOut ? 'AGOTADO' : isLow ? `¡Últimas ${p.stock} un.!` : `${p.stock} disponibles`}</span>
-        <span style="font-size:11.5px;color:var(--muted);">${p.category}</span>
-      </div>
-      ${imgDisplay}
-      <h4>${p.name}</h4>
-      <p class="online-card-desc">${p.description || 'Disponible para pedido inmediato en la bodega.'}</p>
-      <div class="online-card-bottom">
-        <div class="online-card-price">${formatMoney(p.price)}</div>
-        ${
-          isSoldOut
-            ? `<button class="btn btn-outline btn-sm" disabled style="opacity:0.5;cursor:not-allowed;">AGOTADO</button>`
-            : `<button class="btn-add-online" onclick="addClientProductToCart(${p.id})">＋ Agregar</button>`
-        }
-      </div>
-    `;
-
-    grid.appendChild(card);
-  });
-}
-
 window.setClientCategory = function (cat) {
   currentClientCategory = cat;
   populateCategoryPillsAndSelects();
@@ -1549,26 +1508,6 @@ window.addClientProductToCart = function (productId) {
 
   renderClientCartUI();
   showToast(`"${p.name}" agregado al carrito.`);
-};
-
-
-  const existing = onlineCart.find((i) => i.id === productId);
-  if (existing) {
-    if (existing.quantity >= p.stock) {
-      showToast(`No puedes agregar más: solo quedan ${p.stock} unidades disponibles.`);
-      return;
-    }
-    existing.quantity++;
-    existing.subtotal = existing.quantity * existing.price;
-  } else {
-    onlineCart.push({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      emoji: p.emoji,
-      image: p.image || '',
-      quantity: 1,
-      subtotal: p.price
     });
   }
 
@@ -1676,22 +1615,6 @@ window.updateOnlineCartQty = function (productId, delta) {
     item.quantity = newQty;
     item.subtotal = item.quantity * item.price;
   }
-
-  renderClientCartUI();
-  renderOnlineCartModalItems();
-
-  const totalAmount = onlineCart.reduce(
-    (sum, i) => sum + i.subtotal, 0
-  );
-
-  renderOnlinePaymentDetails(totalAmount);
-};
-
-
-  renderClientCartUI();
-  renderOnlineCartModalItems();
-  const totalAmount = onlineCart.reduce((sum, i) => sum + i.subtotal, 0);
-  renderOnlinePaymentDetails(totalAmount);
 };
 
 window.removeOnlineCartItem = function (productId) {
