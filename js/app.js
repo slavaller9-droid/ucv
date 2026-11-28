@@ -622,46 +622,63 @@ window.handleProductImageUpload = function (input) {
   }
 };
 
+
 // ==================== MÓDULO DE CATEGORÍAS ====================
 function initCategoriesModule() {
   const catForm = $('categoryForm');
+
   if (catForm) {
-    catForm.addEventListener('submit', (e) => {
+    catForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const name = $('catName').value.trim();
       const icon = $('catIcon').value.trim() || '📦';
+
+      if (!activeStoreId || activeStoreRole !== 'admin') {
+        alert('Necesitas ser administrador de una bodega activa.');
+        return;
+      }
 
       if (!name) return;
 
       if (editingCategoryId) {
-        const cat = categories.find((c) => c.id === editingCategoryId);
-        if (cat) {
-          const oldName = cat.name;
-          cat.name = name;
-          cat.icon = icon;
-
-          // Actualizar los productos que tenían la categoría anterior
-          products.forEach((p) => {
-            if (p.category === oldName) p.category = name;
-          });
-          Storage.saveProducts(products);
-        }
-        showToast(`Categoría "${name}" actualizada.`);
-      } else {
-        categories.push({
-          id: Date.now(),
-          name,
-          icon
-        });
-        showToast(`Categoría "${name}" creada exitosamente.`);
+        alert('La edición de categorías estará disponible en una siguiente etapa.');
+        return;
       }
 
-      Storage.saveCategories(categories);
-      closeAllModals();
-      editingCategoryId = null;
-      populateCategoryPillsAndSelects();
-      renderCategoriesTable();
-      renderInventoryTable();
+      if (categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+        alert('Ya existe una categoría con ese nombre.');
+        return;
+      }
+
+      const newCategory = {
+        id: Date.now(),
+        name,
+        icon
+      };
+
+      try {
+        await getStoreCollection('categorias')
+          .doc(String(newCategory.id))
+          .set(newCategory);
+
+        categories.push(newCategory);
+
+        showToast(`Categoría "${name}" guardada en Firebase.`);
+
+        closeAllModals();
+        editingCategoryId = null;
+
+        populateCategoryPillsAndSelects();
+        renderCategoriesTable();
+        renderInventoryTable();
+
+        console.log('Categoría guardada correctamente:', newCategory);
+
+      } catch (error) {
+        console.error('Error al guardar categoría:', error);
+        alert('No se pudo guardar la categoría: ' + error.message);
+      }
     });
   }
 
@@ -669,40 +686,39 @@ function initCategoriesModule() {
 }
 
 function populateCategoryPillsAndSelects() {
-  // 1. Select en Modal de Producto
   const pCatSelect = $('pCategory');
   if (pCatSelect) {
     pCatSelect.innerHTML = categories
-      .map((c) => `<option value="${c.name}">${c.icon} ${c.name}</option>`)
+      .map(c => `<option value="${c.name}">${c.icon} ${c.name}</option>`)
       .join('');
   }
 
-  // 2. Select Filtro en Inventario
   const invCatFilter = $('inventoryCatFilter');
   if (invCatFilter) {
-    invCatFilter.innerHTML = '<option value="Todos">Todas las categorías</option>' +
-      categories.map((c) => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join('');
+    invCatFilter.innerHTML =
+      '<option value="Todos">Todas las categorías</option>' +
+      categories.map(c => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join('');
   }
 
-  // 3. Pills en Inventario
   const invPills = $('invCategoryPills');
   if (invPills) {
-    invPills.innerHTML = `<button class="pos-cat-pill ${currentInvCategory === 'Todos' ? 'active' : ''}" onclick="setInventoryCategory('Todos')">Todos</button>` +
-      categories.map((c) => `<button class="pos-cat-pill ${currentInvCategory === c.name ? 'active' : ''}" onclick="setInventoryCategory('${c.name}')">${c.icon} ${c.name}</button>`).join('');
+    invPills.innerHTML =
+      `<button class="pos-cat-pill ${currentInvCategory === 'Todos' ? 'active' : ''}" onclick="setInventoryCategory('Todos')">Todos</button>` +
+      categories.map(c => `<button class="pos-cat-pill ${currentInvCategory === c.name ? 'active' : ''}" onclick="setInventoryCategory('${c.name}')">${c.icon} ${c.name}</button>`).join('');
   }
 
-  // 4. Pills en Ventas POS
   const posPills = $('posCategoryPills');
   if (posPills) {
-    posPills.innerHTML = `<button class="pos-cat-pill ${currentPosCategory === 'Todos' ? 'active' : ''}" onclick="setPosCategory('Todos')">Todos</button>` +
-      categories.map((c) => `<button class="pos-cat-pill ${currentPosCategory === c.name ? 'active' : ''}" onclick="setPosCategory('${c.name}')">${c.icon} ${c.name}</button>`).join('');
+    posPills.innerHTML =
+      `<button class="pos-cat-pill ${currentPosCategory === 'Todos' ? 'active' : ''}" onclick="setPosCategory('Todos')">Todos</button>` +
+      categories.map(c => `<button class="pos-cat-pill ${currentPosCategory === c.name ? 'active' : ''}" onclick="setPosCategory('${c.name}')">${c.icon} ${c.name}</button>`).join('');
   }
 
-  // 5. Pills en Tienda Online
   const clientPills = $('clientCategoryPills');
   if (clientPills) {
-    clientPills.innerHTML = `<button class="pos-cat-pill ${currentClientCategory === 'Todos' ? 'active' : ''}" onclick="setClientCategory('Todos')">Todos</button>` +
-      categories.map((c) => `<button class="pos-cat-pill ${currentClientCategory === c.name ? 'active' : ''}" onclick="setClientCategory('${c.name}')">${c.icon} ${c.name}</button>`).join('');
+    clientPills.innerHTML =
+      `<button class="pos-cat-pill ${currentClientCategory === 'Todos' ? 'active' : ''}" onclick="setClientCategory('Todos')">Todos</button>` +
+      categories.map(c => `<button class="pos-cat-pill ${currentClientCategory === c.name ? 'active' : ''}" onclick="setClientCategory('${c.name}')">${c.icon} ${c.name}</button>`).join('');
   }
 }
 
@@ -717,23 +733,17 @@ function renderCategoriesTable() {
     return;
   }
 
-  categories.forEach((cat) => {
-    const prodCount = products.filter((p) => p.category === cat.name).length;
+  categories.forEach(cat => {
+    const prodCount = products.filter(p => p.category === cat.name).length;
 
-    tbody.insertAdjacentHTML(
-      'beforeend',
-      `<tr>
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
         <td style="font-size:22px;">${cat.icon}</td>
         <td><strong>${cat.name}</strong></td>
         <td><span class="badge b-purple">${prodCount} producto(s)</span></td>
-        <td>
-          <div style="display:flex;gap:6px;">
-            <button class="btn btn-outline btn-sm" onclick="editCategory(${cat.id})">✏️ Editar</button>
-            <button class="btn btn-outline btn-sm" onclick="deleteCategory(${cat.id})" style="color:var(--danger);border-color:var(--danger-soft);">🗑️ Eliminar</button>
-          </div>
-        </td>
-      </tr>`
-    );
+        <td><span class="badge">Edición próximamente</span></td>
+      </tr>
+    `);
   });
 }
 
@@ -744,35 +754,12 @@ window.openCategoryModal = function () {
   $('modalCategory')?.classList.remove('hidden');
 };
 
-window.editCategory = function (id) {
-  const cat = categories.find((c) => c.id === id);
-  if (!cat) return;
-
-  editingCategoryId = id;
-  $('modalCatTitle').textContent = 'Editar Categoría';
-  $('catName').value = cat.name;
-  $('catIcon').value = cat.icon;
-  $('modalCategory')?.classList.remove('hidden');
+window.editCategory = function () {
+  alert('La edición de categorías estará disponible en una siguiente etapa.');
 };
 
-window.deleteCategory = function (id) {
-  const cat = categories.find((c) => c.id === id);
-  if (!cat) return;
-
-  // VALIDACIÓN ESTRICTA: No eliminar si tiene productos asociados
-  const prodCount = products.filter((p) => p.category === cat.name).length;
-  if (prodCount > 0) {
-    alert(`⚠️ NO se puede eliminar la categoría "${cat.name}" porque contiene ${prodCount} producto(s) asignados.\n\nPor favor traslada o elimina primero los productos de esta categoría.`);
-    return;
-  }
-
-  if (confirm(`¿Estás seguro de eliminar la categoría "${cat.name}"?`)) {
-    categories = categories.filter((c) => c.id !== id);
-    Storage.saveCategories(categories);
-    populateCategoryPillsAndSelects();
-    renderCategoriesTable();
-    showToast(`Categoría "${cat.name}" eliminada.`);
-  }
+window.deleteCategory = function () {
+  alert('La eliminación de categorías estará disponible en una siguiente etapa.');
 };
 
 // ==================== INVENTARIO CENTRAL COMPARTIDO ====================
