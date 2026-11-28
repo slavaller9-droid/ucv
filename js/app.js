@@ -973,21 +973,8 @@ async function saveProduct() {
   }
 }
 
-window.deleteProduct = function (id) {
-  if (currentRole === 'cajero') {
-    alert('Acción restringida: Los cajeros no tienen permisos para eliminar productos.');
-    return;
-  }
-
-  const p = products.find((x) => x.id === id);
-  if (!p) return;
-
-  if (confirm(`¿Estás seguro de eliminar el producto "${p.name}" del catálogo?`)) {
-    products = products.filter((x) => x.id !== id);
-    Storage.saveProducts(products);
-    renderAllViews();
-    showToast(`Producto "${p.name}" eliminado.`);
-  }
+window.deleteProduct = function () {
+  alert('La eliminación de productos estará disponible cuando terminemos la migración a Firebase.');
 };
 
 window.openStockEntryModal = function () {
